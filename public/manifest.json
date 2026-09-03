@@ -1,0 +1,26 @@
+{
+  "name": "Kasir Warung Susu",
+  "short_name": "Kasir Susu",
+  "description": "Aplikasi kasir warung susu murni",
+  "start_url": "/meja",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#FBF7F0",
+  "theme_color": "#B9702F",
+  "lang": "id",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

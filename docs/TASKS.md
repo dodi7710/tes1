@@ -8,25 +8,25 @@ Stack: Next.js (PWA) + Supabase (auth/DB) + Vercel (hosting) + GitHub (source co
 
 ## Phase 0 — Project Setup
 
-- [ ] Init Next.js app (TypeScript, App Router) in this repo
+- [x] Init Next.js app (TypeScript, App Router) in this repo
 - [ ] Connect repo to Vercel for auto-deploy on push to `main`
-- [ ] Create Supabase project; store `SUPABASE_URL` / `SUPABASE_ANON_KEY` in `.env.local` and Vercel env vars
-- [ ] Add PWA manifest + service worker + icons so the app is installable on a tablet home screen (NFR: Platform)
-- [ ] Base layout: landscape-first responsive shell sized for 8–11" tablets, Bahasa Indonesia strings, Rupiah formatter (thousands separator, no decimals)
+- [x] Create Supabase project; store `SUPABASE_URL` / `SUPABASE_ANON_KEY` in `.env.local` and Vercel env vars — project `kasir-susu-murni` live, `.env.local` set; Vercel env vars pending Vercel connection
+- [x] Add PWA manifest + service worker + icons so the app is installable on a tablet home screen (NFR: Platform) — icon is a placeholder SVG, swap for a designed PNG before launch
+- [x] Base layout: landscape-first responsive shell sized for 8–11" tablets, Bahasa Indonesia strings, Rupiah formatter (thousands separator, no decimals)
 
 ## Phase 1 — Database Schema (Supabase)
 
-- [ ] Create tables per PRD §7: `users`, `tables`, `menu_items`, `orders`, `order_items`, `payments`, `shifts`
-- [ ] `order_items` includes `status` (aktif/dibatalkan) and `alasan_batal` for the mandatory void reason (`MEJA-3`)
-- [ ] Row-level security: `kasir` role vs `pemilik` role (pemilik-only tables: `menu_items` writes, cross-cashier reports)
-- [ ] Seed script: sample menu items (a few categories), sample tables numbered 1–10
+- [x] Create tables per PRD §7: `users`, `tables`, `menu_items`, `orders`, `order_items`, `payments`, `shifts` — implemented as `profiles` (extends `auth.users`), `tables`, `menu_categories`, `menu_items`, `orders`, `order_items`, `payments`, `shifts`, `store_settings`
+- [x] `order_items` includes `status` (aktif/dibatalkan) and `alasan_batal` for the mandatory void reason (`MEJA-3`) — enforced with a check constraint
+- [x] Row-level security: `kasir` role vs `pemilik` role (pemilik-only tables: `menu_items` writes, cross-cashier reports)
+- [x] Seed script: sample menu items (a few categories), sample tables numbered 1–10
 
 ## Phase 2 — Auth & Roles (`AUTH-1`, `AUTH-2`, `AUTH-3`)
 
-- [ ] PIN entry screen (4–6 digit numeric keypad UI, no username field)
-- [ ] PIN stored hashed, never plain text (NFR: Keamanan data)
-- [ ] Session/role context distinguishing Kasir vs Pemilik; route guards on pemilik-only screens
-- [ ] Pemilik screen: add/deactivate kasir accounts, reset a kasir's PIN
+- [x] PIN entry screen (4–6 digit numeric keypad UI, no username field) — staff picker + PIN pad at `/login`
+- [x] PIN stored hashed, never plain text (NFR: Keamanan data) — delegated to Supabase Auth (bcrypt), synthetic per-profile email so no username is needed
+- [x] Session/role context distinguishing Kasir vs Pemilik; route guards on pemilik-only screens — `middleware.ts` + `lib/auth/session.ts`
+- [ ] Pemilik screen: add/deactivate kasir accounts, reset a kasir's PIN — first `pemilik` account bootstrapped directly (PIN `123456`, change on first login); in-app management screen still to build
 
 ## Phase 3 — Menu Management (`MENU-1`, `MENU-2`)
 
