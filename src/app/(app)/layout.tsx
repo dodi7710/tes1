@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getSessionProfile } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import TopBar from "@/components/top-bar";
+import { PrinterProvider } from "@/components/printer-provider";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const profile = await getSessionProfile();
@@ -15,13 +16,15 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     .single();
 
   return (
-    <div className="min-h-dvh flex flex-col bg-stone-50">
-      <TopBar
-        displayName={profile.display_name}
-        role={profile.role}
-        storeName={settings?.nama_warung ?? "Warung Susu Murni"}
-      />
-      <div className="flex-1 flex flex-col">{children}</div>
-    </div>
+    <PrinterProvider>
+      <div className="min-h-dvh flex flex-col bg-stone-50">
+        <TopBar
+          displayName={profile.display_name}
+          role={profile.role}
+          storeName={settings?.nama_warung ?? "Warung Susu Murni"}
+        />
+        <div className="flex-1 flex flex-col">{children}</div>
+      </div>
+    </PrinterProvider>
   );
 }

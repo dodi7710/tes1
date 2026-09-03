@@ -35,55 +35,67 @@ Stack: Next.js (PWA) + Supabase (auth/DB) + Vercel (hosting) + GitHub (source co
 
 ## Phase 4 — Table & Order Flow (`MEJA-1`–`MEJA-4`)
 
-- [ ] Table overview (1–10 tables) showing status: kosong / terisi
-- [ ] Open a tab on a table → creates an `orders` row (status: terbuka)
-- [ ] Add items to an open tab any time while it's open → `order_items` rows
-- [ ] Edit/cancel an item after its kitchen ticket has printed **requires a reason**, saved to `alasan_batal` (`MEJA-3`)
-- [ ] Closing a tab (after payment, Phase 6) sets the table back to kosong automatically (`MEJA-4`)
+- [x] Table overview (1–10 tables) showing status: kosong / terisi
+- [x] Open a tab on a table → creates an `orders` row (status: terbuka)
+- [x] Add items to an open tab any time while it's open → `order_items` rows
+- [x] Edit/cancel an item after its kitchen ticket has printed **requires a reason**, saved to `alasan_batal` (`MEJA-3`)
+- [x] Closing a tab (after payment, Phase 6) sets the table back to kosong automatically (`MEJA-4`)
+
+Verified live: table grid → open table → add item → total updates → pay → table clears back to kosong. All correct end-to-end.
 
 ## Phase 5 — Kitchen Ticket Printing (`CETAK-1`)
 
-- [ ] Web Bluetooth pairing flow for an ESC/POS thermal printer (Chrome/Android only — see PRD §9 risk)
-- [ ] Kitchen ticket template: table number, items + qty, timestamp
-- [ ] Auto-print fires the moment new item(s) are saved to an order — no manual "send to kitchen" step
-- [ ] Visible error state if the printer is unpaired/unreachable, with a manual reprint action
+- [x] Web Bluetooth pairing flow for an ESC/POS thermal printer (Chrome/Android only — see PRD §9 risk) — generic characteristic discovery in `lib/print/bluetooth.ts`, **not yet tested against a real printer**
+- [x] Kitchen ticket template: table number, items + qty, timestamp — `lib/print/templates.ts`
+- [x] Auto-print fires the moment new item(s) are saved to an order — no manual "send to kitchen" step
+- [x] Visible error state if the printer is unpaired/unreachable, with a manual reprint action — verified live: adding an item with no printer connected correctly shows "belum tercetak" + a "Cetak sekarang" reprint action, and the top-bar printer badge goes red
+
+**Needs real-hardware QA (Phase 10):** the BLE characteristic discovery in `bluetooth.ts` is generic (scans for the first writable characteristic) because cheap ESC/POS printers don't share one GATT UUID — confirm it actually finds the right characteristic on your specific printer model, and check the ESC/POS byte output prints cleanly (paper width, cut command).
 
 ## Phase 6 — Payment & Discount (`BAYAR-1`–`BAYAR-3`)
 
-- [ ] Bill screen: sums all active items on a table's open tab
-- [ ] Manual discount entry (nominal or percent) applied before finalizing
-- [ ] Cash flow: input amount tendered → auto-computed change
-- [ ] QRIS flow: kasir marks the order paid via QRIS (no gateway — manual confirmation, PRD §9 risk #2)
-- [ ] On payment success: create `payments` row, set `orders.status = lunas`
+- [x] Bill screen: sums all active items on a table's open tab
+- [x] Manual discount entry (nominal or percent) applied before finalizing — nominal only for now; percent can be added if wanted
+- [x] Cash flow: input amount tendered → auto-computed change
+- [x] QRIS flow: kasir marks the order paid via QRIS (no gateway — manual confirmation, PRD §9 risk #2)
+- [x] On payment success: create `payments` row, set `orders.status = lunas`
+
+Verified live with both tunai (change calc correct) and QRIS payments.
+
+**Bug found & fixed during QA:** Next.js auto-revalidates the current route after any Server Action call. The `/bayar` page originally hard-404'd once the order it was querying flipped to `lunas` mid-flow (racing the client's post-payment receipt-print step). Fixed by making the page branch on order status instead of 404ing, and moving the print-failure notice to a blocking `alert()` so it can't be wiped by the race. See [payment-form.tsx](../src/components/payment-form.tsx) and [bayar/page.tsx](../src/app/(app)/meja/[id]/bayar/page.tsx).
 
 ## Phase 7 — Receipt Printing (`CETAK-2`)
 
-- [ ] Store settings screen (pemilik): warung name, address, logo upload
-- [ ] Receipt template: name/address/logo, table number, cashier name, item list, total, change — concise layout
-- [ ] Auto-print triggers immediately after payment is recorded
+- [x] Store settings screen (pemilik): warung name, address — logo upload not built (would need file storage; deferred, receipt template supports a name/address header without it for now)
+- [x] Receipt template: name/address, table number, cashier name, item list, total, change — concise layout — `lib/print/templates.ts`; logo omitted, see above
+- [x] Auto-print triggers immediately after payment is recorded
 
 ## Phase 8 — Shift Management (`SHIFT-1`–`SHIFT-3`)
 
-- [ ] Open-shift flow: kasir enters starting cash before the first transaction; block transactions until a shift is open
-- [ ] All cash transactions attribute to the currently open shift
-- [ ] Close-shift flow: kasir enters counted physical cash; system shows discrepancy vs (starting cash + recorded cash sales)
-- [ ] Pemilik view: full shift history (who, when, discrepancy) across all kasir
+- [x] Open-shift flow: kasir enters starting cash before the first transaction; block transactions until a shift is open
+- [x] All cash transactions attribute to the currently open shift
+- [x] Close-shift flow: kasir enters counted physical cash; system shows discrepancy vs (starting cash + recorded cash sales)
+- [x] Pemilik view: full shift history (who, when, discrepancy) across all kasir
+
+Verified live: opened shift with Rp100.000 modal, ran a Rp12.000 cash sale, closed with Rp112.000 counted — selisih correctly computed as Rp0.
 
 ## Phase 9 — Reports (`LAP-1`–`LAP-5`)
 
-- [ ] Revenue totals: daily / weekly / monthly (`LAP-1`)
-- [ ] Best-selling menu items by quantity and revenue (`LAP-2`)
-- [ ] Payment-method breakdown, tunai vs QRIS, by period (`LAP-3`)
-- [ ] Per-kasir/per-shift transaction history, including the void/edit audit log (`LAP-4`)
-- [ ] Per-table revenue and transaction count per day (`LAP-5`)
+- [x] Revenue totals: daily / weekly / monthly (`LAP-1`)
+- [x] Best-selling menu items by quantity and revenue (`LAP-2`)
+- [x] Payment-method breakdown, tunai vs QRIS, by period (`LAP-3`)
+- [x] Per-kasir/per-shift transaction history, including the void/edit audit log (`LAP-4`) — per-kasir totals + a separate void log list; a literal per-shift-id breakdown can be added if wanted
+- [x] Per-table revenue and transaction count per day (`LAP-5`)
+
+Verified live against real test transactions — a tunai sale on meja 1 and a QRIS sale on meja 2 rolled up correctly into every total, the best-seller count, and the per-meja breakdown once viewed in a period range that covered both (they landed on opposite sides of a midnight boundary, which is what a "Hari ini" filter is supposed to do).
 
 ## Phase 10 — PWA Polish & QA
 
-- [ ] Verify install-to-home-screen works on an actual Android tablet in Chrome
-- [ ] End-to-end manual test: open table → order → kitchen ticket prints → pay → receipt prints → table clears
-- [ ] Manual test: shift open → transactions → close → discrepancy math is correct
-- [ ] Manual test: kasir role cannot reach menu management or cross-cashier reports
-- [ ] Production deploy on Vercel; confirm env vars are set there too
+- [ ] Verify install-to-home-screen works on an actual Android tablet in Chrome — **cannot be verified from this environment; needs a real device**
+- [x] End-to-end manual test: open table → order → pay → table clears — verified live (kitchen ticket + receipt *printing* itself still needs a real Bluetooth printer, see Phase 5 note)
+- [x] Manual test: shift open → transactions → close → discrepancy math is correct — verified live
+- [ ] Manual test: kasir role cannot reach menu management or cross-cashier reports — proxy.ts enforces this by role, but not re-verified live under an actual kasir-role login in this session
+- [ ] Production deploy on Vercel; confirm env vars are set there too — **blocked**: Vercel's GitHub App isn't authorized for this repo yet (see chat) — connect it from the Vercel dashboard, then add `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` as env vars on the Vercel project before the first deploy
 
 ---
 

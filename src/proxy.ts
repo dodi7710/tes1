@@ -4,7 +4,7 @@ import { NextResponse, type NextRequest } from "next/server";
 const PEMILIK_ONLY_PREFIXES = ["/menu", "/pengaturan", "/laporan"];
 const PUBLIC_PATHS = ["/login"];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(

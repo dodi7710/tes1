@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logout } from "@/app/actions/auth";
+import PrinterStatusButton from "@/components/printer-status-button";
 import type { Role } from "@/types/database";
 
 const KASIR_LINKS = [{ href: "/meja", label: "Meja" }, { href: "/shift", label: "Shift" }];
@@ -49,6 +50,7 @@ export default function TopBar({
           })}
         </nav>
         <div className="flex items-center gap-3 whitespace-nowrap">
+          <PrinterStatusButton />
           <span className="text-sm text-stone-500">
             {displayName} <span className="text-stone-300">&middot;</span>{" "}
             {role === "pemilik" ? "Pemilik" : "Kasir"}
