@@ -26,12 +26,12 @@ Stack: Next.js (PWA) + Supabase (auth/DB) + Vercel (hosting) + GitHub (source co
 - [x] PIN entry screen (4–6 digit numeric keypad UI, no username field) — staff picker + PIN pad at `/login`
 - [x] PIN stored hashed, never plain text (NFR: Keamanan data) — delegated to Supabase Auth (bcrypt), synthetic per-profile email so no username is needed
 - [x] Session/role context distinguishing Kasir vs Pemilik; route guards on pemilik-only screens — `middleware.ts` + `lib/auth/session.ts`
-- [ ] Pemilik screen: add/deactivate kasir accounts, reset a kasir's PIN — first `pemilik` account bootstrapped directly (PIN `123456`, change on first login); in-app management screen still to build
+- [x] Pemilik screen: add/deactivate kasir accounts, reset a kasir's PIN — built at `/pengaturan`; first `pemilik` account bootstrapped directly (PIN `123456` — change it via the new "PIN saya" form on first login)
 
 ## Phase 3 — Menu Management (`MENU-1`, `MENU-2`)
 
-- [ ] Pemilik-only CRUD: menu item name, price, category, active/inactive toggle
-- [ ] Categorized menu picker for the order screen (e.g. Minuman Susu, Snack)
+- [x] Pemilik-only CRUD: menu item name, price, category, active/inactive toggle — `/menu`
+- [x] Categorized menu picker for the order screen (e.g. Minuman Susu, Snack) — categories built; order-screen picker itself is Phase 4
 
 ## Phase 4 — Table & Order Flow (`MEJA-1`–`MEJA-4`)
 
