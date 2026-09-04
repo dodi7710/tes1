@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { formatRupiah, formatWaktu } from "@/lib/format";
+import { formatRupiah, formatTanggal, formatWaktu } from "@/lib/format";
 
 type Periode = "hari" | "minggu" | "bulan";
 
@@ -24,15 +24,32 @@ function rangeFor(periode: Periode): { start: Date; end: Date; label: string } {
   return { start, end, label };
 }
 
+/** Validates a "YYYY-MM-DD" string from a <input type="date">. */
+function parseDateParam(value: string | undefined): Date | null {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
+  const d = new Date(`${value}T00:00:00`);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+function customRange(dariParam: string, sampaiParam: string): { start: Date; end: Date; label: string } | null {
+  const start = parseDateParam(dariParam);
+  const sampaiDay = parseDateParam(sampaiParam);
+  if (!start || !sampaiDay || sampaiDay < start) return null;
+  const end = new Date(sampaiDay);
+  end.setHours(23, 59, 59, 999);
+  const label = `${formatTanggal(start.toISOString())} – ${formatTanggal(end.toISOString())}`;
+  return { start, end, label };
+}
+
 export default async function LaporanPage({
   searchParams,
 }: {
-  searchParams: Promise<{ periode?: string }>;
+  searchParams: Promise<{ periode?: string; dari?: string; sampai?: string }>;
 }) {
-  const { periode: periodeParam } = await searchParams;
-  const periode: Periode =
-    periodeParam === "minggu" || periodeParam === "bulan" ? periodeParam : "hari";
-  const { start, end, label } = rangeFor(periode);
+  const { periode: periodeParam, dari, sampai } = await searchParams;
+  const custom = dari && sampai ? customRange(dari, sampai) : null;
+  const periode: Periode = periodeParam === "minggu" || periodeParam === "bulan" ? periodeParam : "hari";
+  const { start, end, label } = custom ?? rangeFor(periode);
 
   const supabase = await createClient();
 
@@ -157,19 +174,49 @@ export default async function LaporanPage({
     <main className="flex-1 p-4 max-w-3xl w-full mx-auto space-y-8">
       <div>
         <h1 className="text-xl font-semibold text-stone-800 mb-1">Laporan</h1>
-        <div className="flex gap-2 mt-2">
+        <div className="flex flex-wrap items-center gap-2 mt-2">
           {(["hari", "minggu", "bulan"] as const).map((p) => (
             <Link
               key={p}
               href={`/laporan?periode=${p}`}
               className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
-                periode === p ? "bg-amber-100 text-amber-900" : "text-stone-500 hover:bg-stone-100"
+                !custom && periode === p ? "bg-amber-100 text-amber-900" : "text-stone-500 hover:bg-stone-100"
               }`}
             >
               {p === "hari" ? "Hari ini" : p === "minggu" ? "Minggu ini" : "Bulan ini"}
             </Link>
           ))}
+
+          <form action="/laporan" className="flex items-center gap-1.5 pl-2 ml-1 border-l border-stone-200">
+            <input
+              type="date"
+              name="dari"
+              defaultValue={dari ?? ""}
+              required
+              className="rounded-lg border border-stone-300 px-2 py-1.5 text-sm"
+            />
+            <span className="text-stone-400 text-sm">–</span>
+            <input
+              type="date"
+              name="sampai"
+              defaultValue={sampai ?? ""}
+              required
+              className="rounded-lg border border-stone-300 px-2 py-1.5 text-sm"
+            />
+            <button
+              className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
+                custom ? "bg-amber-100 text-amber-900" : "bg-stone-100 text-stone-600 hover:bg-stone-200"
+              }`}
+            >
+              Terapkan
+            </button>
+          </form>
         </div>
+        {dari && sampai && !custom && (
+          <p className="text-xs text-red-600 mt-1">
+            Rentang tanggal tidak valid — pastikan tanggal akhir tidak sebelum tanggal awal.
+          </p>
+        )}
       </div>
 
       <section className="grid grid-cols-3 gap-3">

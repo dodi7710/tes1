@@ -26,6 +26,8 @@ Stack: Next.js (PWA) + Supabase (auth/DB) + Vercel (hosting) + GitHub (source co
 - [x] PIN entry screen (4–6 digit numeric keypad UI, no username field) — staff picker + PIN pad at `/login`
 - [x] PIN stored hashed, never plain text (NFR: Keamanan data) — delegated to Supabase Auth (bcrypt), synthetic per-profile email so no username is needed
 - [x] Session/role context distinguishing Kasir vs Pemilik; route guards on pemilik-only screens — `middleware.ts` + `lib/auth/session.ts`
+
+**Bug found & fixed post-launch:** logging in as a kasir (not pemilik) worked but landed on a blank white page until manually reloaded. Cause: after `signInWithPassword()`, the client did a soft `router.replace()` right as the session cookie was being set — the very next Server Component render sometimes ran before the cookie was visible to it. Fixed by using a full navigation (`window.location.href`) after sign-in instead, which guarantees the next request carries the fresh cookie. Verified live: login as kasir now lands directly on `/meja` with the correct role-scoped nav, no reload needed.
 - [x] Pemilik screen: add/deactivate kasir accounts, reset a kasir's PIN — built at `/pengaturan`; first `pemilik` account bootstrapped directly (PIN `123456` — change it via the new "PIN saya" form on first login)
 
 ## Phase 3 — Menu Management (`MENU-1`, `MENU-2`)
@@ -53,8 +55,8 @@ Verified live: cancelled a real stray open table with zero items, confirmed it r
 
 - [x] Web Bluetooth pairing flow for an ESC/POS thermal printer (Chrome/Android only — see PRD §9 risk) — generic characteristic discovery in `lib/print/bluetooth.ts`, **not yet tested against a real printer**
 - [x] Kitchen ticket template: table number, items + qty, timestamp, and per-item catatan when present — `lib/print/templates.ts`
-- [x] Auto-print fires the moment new item(s) are saved to an order — no manual "send to kitchen" step
-- [x] Visible error state if the printer is unpaired/unreachable, with a manual reprint action — verified live: adding an item with no printer connected correctly shows "belum tercetak" + a "Cetak sekarang" reprint action, and the top-bar printer badge goes red
+- [x] ~~Auto-print fires the moment new item(s) are saved to an order~~ **Changed per user feedback:** printing per item-tap meant one ticket per drink instead of one ticket for the round, awkward to hand to the kitchen. Adding an item no longer auto-prints; a prominent "🖨 Cetak Pesanan untuk Dapur (N item)" button appears whenever there are unprinted active items, batching everything added since the last print into one ticket the kasir sends (and can stick on the table) once.
+- [x] Visible error state if the printer is unpaired/unreachable, with a manual reprint action — the same button doubles as this: it stays showing (with an accurate count) until a print actually succeeds, and the top-bar printer badge goes red on failure
 
 **Needs real-hardware QA (Phase 10):** the BLE characteristic discovery in `bluetooth.ts` is generic (scans for the first writable characteristic) because cheap ESC/POS printers don't share one GATT UUID — confirm it actually finds the right characteristic on your specific printer model, and check the ESC/POS byte output prints cleanly (paper width, cut command).
 
@@ -89,7 +91,7 @@ Verified live: opened shift with Rp100.000 modal, ran a Rp12.000 cash sale, clos
 
 ## Phase 9 — Reports (`LAP-1`–`LAP-5`)
 
-- [x] Revenue totals: daily / weekly / monthly (`LAP-1`)
+- [x] Revenue totals: daily / weekly / monthly (`LAP-1`) — plus, per user feedback, a custom date-range picker (native `<input type="date">` pair + GET form) alongside the three tabs for reports outside those fixed windows
 - [x] Best-selling menu items by quantity and revenue (`LAP-2`)
 - [x] Payment-method breakdown, tunai vs QRIS, by period (`LAP-3`)
 - [x] Per-kasir/per-shift transaction history, including the void/edit audit log (`LAP-4`) — per-kasir totals + a separate void log list; a literal per-shift-id breakdown can be added if wanted

@@ -94,21 +94,12 @@ export default function OrderDetail({
     setError(null);
     startTransition(async () => {
       try {
-        const inserted = await addOrderItem(order!.id, menuItem.id, qty, catatan || null);
+        // Doesn't print immediately — kasir adds everything for this round
+        // first, then sends it to the kitchen as one ticket via "Cetak
+        // Pesanan" once, instead of one printout per tap.
+        await addOrderItem(order!.id, menuItem.id, qty, catatan || null);
         setPendingMenuItem(null);
         router.refresh();
-        await printKitchenTicket([
-          {
-            id: inserted.id,
-            nama_item: inserted.nama_item,
-            harga_saat_itu: inserted.harga_saat_itu,
-            qty: inserted.qty,
-            status: "aktif",
-            alasan_batal: null,
-            dicetak_dapur: false,
-            catatan: inserted.catatan,
-          },
-        ]);
       } catch (e) {
         setError(e instanceof Error ? e.message : "Gagal menambah item");
       }
@@ -172,23 +163,6 @@ export default function OrderDetail({
         />
       )}
 
-      {unprinted.length > 0 && (
-        <div className="flex items-center justify-between rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 text-sm text-amber-800">
-          <span>{unprinted.length} item belum tercetak ke dapur.</span>
-          <button
-            disabled={isPending}
-            onClick={() =>
-              startTransition(async () => {
-                await printKitchenTicket(unprinted);
-              })
-            }
-            className="font-medium underline disabled:opacity-50"
-          >
-            Cetak sekarang
-          </button>
-        </div>
-      )}
-
       <div className="rounded-xl border border-stone-200 bg-white divide-y divide-stone-100">
         {activeItems.map((item) => (
           <div key={item.id} className="px-4 py-2.5">
@@ -236,6 +210,20 @@ export default function OrderDetail({
             ))}
           </ul>
         </details>
+      )}
+
+      {unprinted.length > 0 && (
+        <button
+          disabled={isPending}
+          onClick={() =>
+            startTransition(async () => {
+              await printKitchenTicket(unprinted);
+            })
+          }
+          className="w-full rounded-xl bg-stone-800 text-white py-3 text-sm font-semibold disabled:opacity-50"
+        >
+          🖨 Cetak Pesanan untuk Dapur ({unprinted.length} item)
+        </button>
       )}
 
       <div className="flex items-center justify-between rounded-xl bg-stone-800 text-white px-4 py-3">

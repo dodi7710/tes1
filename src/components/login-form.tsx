@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { loginEmailFor } from "@/lib/auth/login-email";
 
@@ -12,7 +11,6 @@ export default function LoginForm({ staff }: { staff: Staff[] }) {
   const [pin, setPin] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-  const router = useRouter();
 
   function pickDigit(d: string) {
     setError(null);
@@ -44,8 +42,13 @@ export default function LoginForm({ staff }: { staff: Staff[] }) {
         setPin("");
         return;
       }
-      router.replace("/meja");
-      router.refresh();
+      // A client-side router.replace() here raced the session cookie the
+      // browser client just set — the very next Server Component render
+      // sometimes ran before the cookie was visible to it, rendering a
+      // blank page until a manual reload. A full navigation guarantees the
+      // next request to the server carries the fresh cookie.
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+      window.location.href = "/meja";
     });
   }
 
