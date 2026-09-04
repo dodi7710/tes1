@@ -9,8 +9,8 @@ Stack: Next.js (PWA) + Supabase (auth/DB) + Vercel (hosting) + GitHub (source co
 ## Phase 0 — Project Setup
 
 - [x] Init Next.js app (TypeScript, App Router) in this repo
-- [ ] Connect repo to Vercel for auto-deploy on push to `main`
-- [x] Create Supabase project; store `SUPABASE_URL` / `SUPABASE_ANON_KEY` in `.env.local` and Vercel env vars — project `kasir-susu-murni` live, `.env.local` set; Vercel env vars pending Vercel connection
+- [x] Connect repo to Vercel for auto-deploy on push to `main` — project `kasir-susu-murni` on team `test11-8db4`, linked to `dodi7710/tes1`, live at kasir-susu-murni.vercel.app
+- [x] Create Supabase project; store `SUPABASE_URL` / `SUPABASE_ANON_KEY` in `.env.local` and Vercel env vars — project `kasir-susu-murni` live, `.env.local` set, Vercel env vars set (Config for the two `NEXT_PUBLIC_*`, Secret for `SUPABASE_SERVICE_ROLE_KEY`)
 - [x] Add PWA manifest + service worker + icons so the app is installable on a tablet home screen (NFR: Platform) — icon is a placeholder SVG, swap for a designed PNG before launch
 - [x] Base layout: landscape-first responsive shell sized for 8–11" tablets, Bahasa Indonesia strings, Rupiah formatter (thousands separator, no decimals)
 
@@ -95,7 +95,7 @@ Verified live against real test transactions — a tunai sale on meja 1 and a QR
 - [x] End-to-end manual test: open table → order → pay → table clears — verified live (kitchen ticket + receipt *printing* itself still needs a real Bluetooth printer, see Phase 5 note)
 - [x] Manual test: shift open → transactions → close → discrepancy math is correct — verified live
 - [ ] Manual test: kasir role cannot reach menu management or cross-cashier reports — proxy.ts enforces this by role, but not re-verified live under an actual kasir-role login in this session
-- [ ] Production deploy on Vercel; confirm env vars are set there too — **blocked**: Vercel's GitHub App isn't authorized for this repo yet (see chat) — connect it from the Vercel dashboard, then add `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` as env vars on the Vercel project before the first deploy
+- [x] Production deploy on Vercel; confirm env vars are set there too — live at kasir-susu-murni.vercel.app, env vars set. Not yet re-verified live in production (only locally) that login/orders work against the deployed build — worth a quick click-through after this commit's redeploy lands.
 
 ---
 
