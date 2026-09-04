@@ -37,8 +37,14 @@ export async function openTable(mejaId: string): Promise<string> {
   return order.id;
 }
 
-export async function addOrderItem(orderId: string, menuItemId: string, qty = 1) {
+export async function addOrderItem(
+  orderId: string,
+  menuItemId: string,
+  qty = 1,
+  catatan: string | null = null,
+) {
   await requireSession();
+  if (qty < 1) throw new Error("Qty minimal 1");
   const supabase = await createClient();
 
   const { data: menuItem, error: menuErr } = await supabase
@@ -56,8 +62,9 @@ export async function addOrderItem(orderId: string, menuItemId: string, qty = 1)
       nama_item: menuItem.nama,
       harga_saat_itu: menuItem.harga,
       qty,
+      catatan: catatan?.trim() || null,
     })
-    .select("id, nama_item, harga_saat_itu, qty")
+    .select("id, nama_item, harga_saat_itu, qty, catatan")
     .single();
   if (error) throw new Error(error.message);
 
@@ -88,6 +95,41 @@ export async function voidOrderItem(itemId: string, alasan: string) {
   if (error) throw new Error(error.message);
 
   revalidatePath("/meja");
+}
+
+/**
+ * Cancels an entire open tab without payment — e.g. it was opened by
+ * mistake, or the customer left before ordering. Frees the table back to
+ * kosong. Requires a reason, same audit pattern as voidOrderItem.
+ */
+export async function cancelOrder(orderId: string, alasan: string) {
+  const session = await requireSession();
+  if (!alasan.trim()) throw new Error("Alasan pembatalan wajib diisi");
+
+  const supabase = await createClient();
+  const { data: order, error: orderErr } = await supabase
+    .from("orders")
+    .select("id, meja_id, status")
+    .eq("id", orderId)
+    .single();
+  if (orderErr || !order) throw new Error("Pesanan tidak ditemukan");
+  if (order.status !== "terbuka") throw new Error("Pesanan ini sudah tidak aktif");
+
+  const { error } = await supabase
+    .from("orders")
+    .update({
+      status: "dibatalkan",
+      alasan_batal: alasan.trim(),
+      dibatalkan_oleh: session.id,
+      dibatalkan_pada: new Date().toISOString(),
+    })
+    .eq("id", orderId);
+  if (error) throw new Error(error.message);
+
+  await supabase.from("tables").update({ status: "kosong" }).eq("id", order.meja_id);
+
+  revalidatePath("/meja");
+  revalidatePath("/laporan");
 }
 
 export async function createPayment(input: {

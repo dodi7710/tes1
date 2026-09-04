@@ -43,10 +43,16 @@ Stack: Next.js (PWA) + Supabase (auth/DB) + Vercel (hosting) + GitHub (source co
 
 Verified live: table grid → open table → add item → total updates → pay → table clears back to kosong. All correct end-to-end.
 
+**Additions from post-launch user feedback:**
+- Qty stepper + optional kitchen "catatan" (e.g. "gula sedikit", "tanpa es") on each order item, entered via a small panel when adding from the menu picker instead of the item auto-adding at qty 1 with no way to note anything. Catatan prints on the kitchen ticket. Schema: `order_items.catatan`.
+- **New:** "Batalkan meja" — releases an open tab back to `kosong` without payment, with a required reason (mirrors the per-item void pattern). Fixes a real gap found from a user report: a table opened by mistake (or a customer who left without ordering) had no way to be released — it stayed `terisi` forever, since the only path back to `kosong` was through payment, which requires at least one active item. Schema: `orders.status` now also allows `'dibatalkan'`, plus `alasan_batal`/`dibatalkan_oleh`/`dibatalkan_pada` columns mirroring `order_items`. Logged in Laporan under "Log meja dibatalkan".
+
+Verified live: cancelled a real stray open table with zero items, confirmed it returns to kosong; added a 2-qty item with a catatan and confirmed both the quantity and note reflect correctly in the order and would print on the kitchen ticket.
+
 ## Phase 5 — Kitchen Ticket Printing (`CETAK-1`)
 
 - [x] Web Bluetooth pairing flow for an ESC/POS thermal printer (Chrome/Android only — see PRD §9 risk) — generic characteristic discovery in `lib/print/bluetooth.ts`, **not yet tested against a real printer**
-- [x] Kitchen ticket template: table number, items + qty, timestamp — `lib/print/templates.ts`
+- [x] Kitchen ticket template: table number, items + qty, timestamp, and per-item catatan when present — `lib/print/templates.ts`
 - [x] Auto-print fires the moment new item(s) are saved to an order — no manual "send to kitchen" step
 - [x] Visible error state if the printer is unpaired/unreachable, with a manual reprint action — verified live: adding an item with no printer connected correctly shows "belum tercetak" + a "Cetak sekarang" reprint action, and the top-bar printer badge goes red
 

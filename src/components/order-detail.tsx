@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { addOrderItem, markItemsPrinted, openTable, voidOrderItem } from "@/app/actions/orders";
+import { addOrderItem, cancelOrder, markItemsPrinted, openTable, voidOrderItem } from "@/app/actions/orders";
 import { usePrinter } from "@/components/printer-provider";
 import { buildKitchenTicket } from "@/lib/print/templates";
 import { formatRupiah, formatWaktu } from "@/lib/format";
@@ -16,6 +16,7 @@ type Item = {
   status: string;
   alasan_batal: string | null;
   dicetak_dapur: boolean;
+  catatan: string | null;
 };
 type Category = { id: string; nama: string; urutan: number };
 type MenuItem = { id: string; nama: string; harga: number; kategori_id: string | null };
@@ -37,6 +38,8 @@ export default function OrderDetail({
   const [error, setError] = useState<string | null>(null);
   const [voidTarget, setVoidTarget] = useState<string | null>(null);
   const [showMenu, setShowMenu] = useState(false);
+  const [pendingMenuItem, setPendingMenuItem] = useState<MenuItem | null>(null);
+  const [cancelling, setCancelling] = useState(false);
   const printer = usePrinter();
   const router = useRouter();
 
@@ -76,7 +79,7 @@ export default function OrderDetail({
     if (ticketItems.length === 0 || !order) return;
     const bytes = buildKitchenTicket({
       nomorMeja: table.nomor,
-      items: ticketItems.map((i) => ({ nama_item: i.nama_item, qty: i.qty })),
+      items: ticketItems.map((i) => ({ nama_item: i.nama_item, qty: i.qty, catatan: i.catatan })),
       waktu: new Date().toISOString(),
     });
     const result = await printer.print(bytes);
@@ -87,11 +90,12 @@ export default function OrderDetail({
     return result;
   }
 
-  function addItem(menuItem: MenuItem) {
+  function confirmAddItem(menuItem: MenuItem, qty: number, catatan: string) {
     setError(null);
     startTransition(async () => {
       try {
-        const inserted = await addOrderItem(order!.id, menuItem.id, 1);
+        const inserted = await addOrderItem(order!.id, menuItem.id, qty, catatan || null);
+        setPendingMenuItem(null);
         router.refresh();
         await printKitchenTicket([
           {
@@ -102,6 +106,7 @@ export default function OrderDetail({
             status: "aktif",
             alasan_batal: null,
             dicetak_dapur: false,
+            catatan: inserted.catatan,
           },
         ]);
       } catch (e) {
@@ -123,6 +128,18 @@ export default function OrderDetail({
     });
   }
 
+  function submitCancelOrder(alasan: string) {
+    setError(null);
+    startTransition(async () => {
+      try {
+        await cancelOrder(order!.id, alasan);
+        router.replace("/meja");
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Gagal membatalkan meja");
+      }
+    });
+  }
+
   const grouped = categories.map((c) => ({ category: c, items: menuItems.filter((m) => m.kategori_id === c.id) }));
   const uncategorized = menuItems.filter((m) => !m.kategori_id);
 
@@ -133,13 +150,26 @@ export default function OrderDetail({
           <h1 className="text-xl font-semibold text-stone-800">Meja {table.nomor}</h1>
           <p className="text-xs text-stone-400">Dibuka {formatWaktu(order.dibuka_pada)}</p>
         </div>
-        <Link href="/meja" className="text-sm text-stone-500 hover:text-stone-700">
-          &larr; Semua meja
-        </Link>
+        <div className="flex items-center gap-3">
+          <button onClick={() => setCancelling(true)} className="text-xs font-medium text-stone-400 hover:text-red-600">
+            Batalkan meja
+          </button>
+          <Link href="/meja" className="text-sm text-stone-500 hover:text-stone-700">
+            &larr; Semua meja
+          </Link>
+        </div>
       </div>
 
       {error && (
         <p className="rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm px-3 py-2">{error}</p>
+      )}
+
+      {cancelling && (
+        <CancelOrderPanel
+          hasItems={activeItems.length > 0}
+          onCancel={() => setCancelling(false)}
+          onSubmit={submitCancelOrder}
+        />
       )}
 
       {unprinted.length > 0 && (
@@ -166,12 +196,17 @@ export default function OrderDetail({
               <VoidRow item={item} onCancel={() => setVoidTarget(null)} onSubmit={submitVoid} />
             ) : (
               <div className="flex items-center gap-3">
-                <span className="flex-1 text-sm text-stone-800">
-                  {item.qty}x {item.nama_item}
-                  {!item.dicetak_dapur && (
-                    <span className="ml-2 text-xs text-amber-600">belum dicetak</span>
+                <div className="flex-1 min-w-0">
+                  <span className="text-sm text-stone-800">
+                    {item.qty}x {item.nama_item}
+                    {!item.dicetak_dapur && (
+                      <span className="ml-2 text-xs text-amber-600">belum dicetak</span>
+                    )}
+                  </span>
+                  {item.catatan && (
+                    <p className="text-xs text-stone-400 truncate">Catatan: {item.catatan}</p>
                   )}
-                </span>
+                </div>
                 <span className="text-sm font-medium tabular-nums text-stone-600">
                   {formatRupiah(item.qty * item.harga_saat_itu)}
                 </span>
@@ -226,7 +261,16 @@ export default function OrderDetail({
         </Link>
       </div>
 
-      {showMenu && (
+      {pendingMenuItem && (
+        <AddItemPanel
+          menuItem={pendingMenuItem}
+          isPending={isPending}
+          onCancel={() => setPendingMenuItem(null)}
+          onConfirm={(qty, catatan) => confirmAddItem(pendingMenuItem, qty, catatan)}
+        />
+      )}
+
+      {showMenu && !pendingMenuItem && (
         <div className="space-y-4 rounded-xl border border-stone-200 bg-white p-4">
           {grouped.map(({ category, items: catItems }) => (
             <div key={category.id}>
@@ -236,7 +280,7 @@ export default function OrderDetail({
                   <button
                     key={m.id}
                     disabled={isPending}
-                    onClick={() => addItem(m)}
+                    onClick={() => setPendingMenuItem(m)}
                     className="rounded-lg border border-stone-200 px-3 py-2 text-left text-sm hover:border-amber-400 disabled:opacity-50"
                   >
                     <div className="font-medium text-stone-800">{m.nama}</div>
@@ -254,7 +298,7 @@ export default function OrderDetail({
                   <button
                     key={m.id}
                     disabled={isPending}
-                    onClick={() => addItem(m)}
+                    onClick={() => setPendingMenuItem(m)}
                     className="rounded-lg border border-stone-200 px-3 py-2 text-left text-sm hover:border-amber-400 disabled:opacity-50"
                   >
                     <div className="font-medium text-stone-800">{m.nama}</div>
@@ -267,6 +311,113 @@ export default function OrderDetail({
         </div>
       )}
     </main>
+  );
+}
+
+function AddItemPanel({
+  menuItem,
+  isPending,
+  onCancel,
+  onConfirm,
+}: {
+  menuItem: MenuItem;
+  isPending: boolean;
+  onCancel: () => void;
+  onConfirm: (qty: number, catatan: string) => void;
+}) {
+  const [qty, setQty] = useState(1);
+  const [catatan, setCatatan] = useState("");
+
+  return (
+    <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="font-medium text-stone-800">{menuItem.nama}</p>
+          <p className="text-xs text-stone-500 tabular-nums">{formatRupiah(menuItem.harga)} / item</p>
+        </div>
+        <button onClick={onCancel} className="text-xs font-medium text-stone-500">
+          Batal
+        </button>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <span className="text-xs font-medium text-stone-500">Qty</span>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setQty((q) => Math.max(1, q - 1))}
+            className="h-9 w-9 rounded-lg border border-stone-300 bg-white text-lg font-medium text-stone-700"
+          >
+            −
+          </button>
+          <span className="w-8 text-center font-medium tabular-nums">{qty}</span>
+          <button
+            type="button"
+            onClick={() => setQty((q) => Math.min(20, q + 1))}
+            className="h-9 w-9 rounded-lg border border-stone-300 bg-white text-lg font-medium text-stone-700"
+          >
+            +
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <span className="text-xs font-medium text-stone-500">Catatan untuk dapur (opsional)</span>
+        <input
+          value={catatan}
+          onChange={(e) => setCatatan(e.target.value)}
+          placeholder="mis. susu hangat, gula sedikit, tanpa es"
+          className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-sm"
+        />
+      </div>
+
+      <button
+        disabled={isPending}
+        onClick={() => onConfirm(qty, catatan)}
+        className="w-full rounded-lg bg-amber-700 text-white py-2.5 text-sm font-medium disabled:opacity-50"
+      >
+        Tambah {qty}x ke pesanan — {formatRupiah(qty * menuItem.harga)}
+      </button>
+    </div>
+  );
+}
+
+function CancelOrderPanel({
+  hasItems,
+  onCancel,
+  onSubmit,
+}: {
+  hasItems: boolean;
+  onCancel: () => void;
+  onSubmit: (alasan: string) => void;
+}) {
+  const [alasan, setAlasan] = useState("");
+  return (
+    <div className="rounded-xl border border-red-200 bg-red-50 p-4 space-y-3">
+      <p className="text-sm text-red-900">
+        {hasItems
+          ? "Membatalkan meja ini akan menghapus seluruh pesanan tanpa pembayaran. Item yang sudah dicetak ke dapur tetap perlu dikomunikasikan pembatalannya secara manual."
+          : "Meja ini akan dilepas kembali menjadi kosong tanpa pesanan."}
+      </p>
+      <input
+        required
+        placeholder="Alasan pembatalan meja"
+        value={alasan}
+        onChange={(e) => setAlasan(e.target.value)}
+        className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm"
+      />
+      <div className="flex gap-2">
+        <button
+          onClick={() => alasan.trim() && onSubmit(alasan)}
+          className="rounded-lg bg-red-600 text-white px-4 py-2 text-sm font-medium"
+        >
+          Batalkan Meja
+        </button>
+        <button onClick={onCancel} className="text-sm font-medium text-stone-500">
+          Batal
+        </button>
+      </div>
+    </div>
   );
 }
 

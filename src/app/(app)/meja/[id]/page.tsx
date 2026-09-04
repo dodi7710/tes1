@@ -20,7 +20,7 @@ export default async function MejaDetailPage({ params }: { params: Promise<{ id:
     order
       ? supabase
           .from("order_items")
-          .select("id, nama_item, harga_saat_itu, qty, status, alasan_batal, dicetak_dapur")
+          .select("id, nama_item, harga_saat_itu, qty, status, alasan_batal, dicetak_dapur, catatan")
           .eq("order_id", order.id)
           .order("dibuat_pada")
       : Promise.resolve({ data: [] }),

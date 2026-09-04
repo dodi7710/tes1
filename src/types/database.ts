@@ -71,6 +71,7 @@ export type Database = {
       order_items: {
         Row: {
           alasan_batal: string | null
+          catatan: string | null
           dibatalkan_oleh: string | null
           dibatalkan_pada: string | null
           dibuat_pada: string
@@ -85,6 +86,7 @@ export type Database = {
         }
         Insert: {
           alasan_batal?: string | null
+          catatan?: string | null
           dibatalkan_oleh?: string | null
           dibatalkan_pada?: string | null
           dibuat_pada?: string
@@ -99,6 +101,7 @@ export type Database = {
         }
         Update: {
           alasan_batal?: string | null
+          catatan?: string | null
           dibatalkan_oleh?: string | null
           dibatalkan_pada?: string | null
           dibuat_pada?: string
@@ -137,6 +140,9 @@ export type Database = {
       }
       orders: {
         Row: {
+          alasan_batal: string | null
+          dibatalkan_oleh: string | null
+          dibatalkan_pada: string | null
           dibuka_oleh: string
           dibuka_pada: string
           ditutup_pada: string | null
@@ -146,6 +152,9 @@ export type Database = {
           status: string
         }
         Insert: {
+          alasan_batal?: string | null
+          dibatalkan_oleh?: string | null
+          dibatalkan_pada?: string | null
           dibuka_oleh: string
           dibuka_pada?: string
           ditutup_pada?: string | null
@@ -155,6 +164,9 @@ export type Database = {
           status?: string
         }
         Update: {
+          alasan_batal?: string | null
+          dibatalkan_oleh?: string | null
+          dibatalkan_pada?: string | null
           dibuka_oleh?: string
           dibuka_pada?: string
           ditutup_pada?: string | null
@@ -164,6 +176,13 @@ export type Database = {
           status?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "orders_dibatalkan_oleh_fkey"
+            columns: ["dibatalkan_oleh"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "orders_dibuka_oleh_fkey"
             columns: ["dibuka_oleh"]
@@ -386,7 +405,7 @@ export type TablesUpdate<T extends keyof DefaultSchema["Tables"]> =
 // App-level convenience aliases
 export type Role = "kasir" | "pemilik"
 export type StatusMeja = "kosong" | "terisi"
-export type StatusOrder = "terbuka" | "lunas"
+export type StatusOrder = "terbuka" | "lunas" | "dibatalkan"
 export type StatusOrderItem = "aktif" | "dibatalkan"
 export type MetodeBayar = "tunai" | "qris"
 export type StatusShift = "buka" | "tutup"

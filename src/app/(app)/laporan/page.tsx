@@ -36,7 +36,7 @@ export default async function LaporanPage({
 
   const supabase = await createClient();
 
-  const [{ data: payments }, { data: paidOrders }, { data: voids }] = await Promise.all([
+  const [{ data: payments }, { data: paidOrders }, { data: voids }, { data: cancelledOrders }] = await Promise.all([
     supabase
       .from("payments")
       .select("id, metode, total, dibuat_pada, kasir_id, profiles(display_name)")
@@ -52,6 +52,13 @@ export default async function LaporanPage({
     supabase
       .from("order_items")
       .select("id, nama_item, qty, alasan_batal, dibatalkan_pada, dibatalkan_oleh, profiles(display_name)")
+      .eq("status", "dibatalkan")
+      .gte("dibatalkan_pada", start.toISOString())
+      .lte("dibatalkan_pada", end.toISOString())
+      .order("dibatalkan_pada", { ascending: false }),
+    supabase
+      .from("orders")
+      .select("id, alasan_batal, dibatalkan_pada, tables(nomor), profiles!orders_dibatalkan_oleh_fkey(display_name)")
       .eq("status", "dibatalkan")
       .gte("dibatalkan_pada", start.toISOString())
       .lte("dibatalkan_pada", end.toISOString())
@@ -135,6 +142,14 @@ export default async function LaporanPage({
     qty: number;
     alasan_batal: string | null;
     dibatalkan_pada: string;
+    profiles: { display_name: string } | null;
+  }[];
+
+  const cancelledOrderRows = (cancelledOrders ?? []) as unknown as {
+    id: string;
+    alasan_batal: string | null;
+    dibatalkan_pada: string;
+    tables: { nomor: number } | null;
     profiles: { display_name: string } | null;
   }[];
 
@@ -267,6 +282,26 @@ export default async function LaporanPage({
           ))}
           {voidRows.length === 0 && (
             <p className="px-4 py-4 text-sm text-stone-400">Tidak ada pembatalan pada periode ini.</p>
+          )}
+        </div>
+      </section>
+
+      <section>
+        <h2 className="font-medium text-stone-800 mb-3">Log meja dibatalkan</h2>
+        <div className="rounded-xl border border-stone-200 bg-white divide-y divide-stone-100">
+          {cancelledOrderRows.map((c) => (
+            <div key={c.id} className="px-4 py-2 text-sm">
+              <div className="flex justify-between">
+                <span>Meja {c.tables?.nomor ?? "-"}</span>
+                <span className="text-stone-400">{formatWaktu(c.dibatalkan_pada)}</span>
+              </div>
+              <p className="text-xs text-stone-400">
+                {c.profiles?.display_name ?? "-"} — {c.alasan_batal}
+              </p>
+            </div>
+          ))}
+          {cancelledOrderRows.length === 0 && (
+            <p className="px-4 py-4 text-sm text-stone-400">Tidak ada meja yang dibatalkan pada periode ini.</p>
           )}
         </div>
       </section>

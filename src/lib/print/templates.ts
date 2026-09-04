@@ -1,7 +1,7 @@
-import { Receipt } from "./escpos";
+import { Receipt, wrap } from "./escpos";
 import { formatRupiah, formatWaktu } from "@/lib/format";
 
-type TicketItem = { nama_item: string; qty: number };
+type TicketItem = { nama_item: string; qty: number; catatan?: string | null };
 
 export function buildKitchenTicket(input: {
   nomorMeja: number;
@@ -14,11 +14,12 @@ export function buildKitchenTicket(input: {
   r.center(false).divider();
   r.line(formatWaktu(input.waktu));
   r.feed(1);
-  r.bold(true);
   for (const item of input.items) {
-    r.line(`${item.qty}x  ${item.nama_item}`);
+    r.bold(true).line(`${item.qty}x  ${item.nama_item}`).bold(false);
+    if (item.catatan) {
+      for (const line of wrap(`  -> ${item.catatan}`)) r.line(line);
+    }
   }
-  r.bold(false);
   r.feed(3);
   r.cut();
   return r.toBytes();
