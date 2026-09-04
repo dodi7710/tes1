@@ -62,6 +62,8 @@ Verified live: table grid → open table → add item → total updates → pay 
 
 Verified live with both tunai (change calc correct) and QRIS payments.
 
+**Bug found & fixed post-launch (reported by the user on the live site):** on their device, "Modal awal" only ever saved as a tiny value (e.g. `Rp 22`) no matter what they typed — the native numeric keyboard's own "done"/checkmark key was submitting the form mid-entry, before all digits landed. All free-text Rupiah amount fields (modal awal, tutup shift, diskon, uang diterima) were replaced with an on-screen keypad component ([rupiah-keypad-input.tsx](../src/components/rupiah-keypad-input.tsx)) that never hands off to the device's own keyboard, so there's no native "submit" action to hit accidentally. Re-verified live: multi-digit entry now accumulates correctly on both the shift and payment forms. Also fixed a related stale-state bug found in the process — closing a shift then immediately opening a new one would flash the old "shift ditutup" summary instead of the new "shift sedang berjalan" panel.
+
 **Bug found & fixed during QA:** Next.js auto-revalidates the current route after any Server Action call. The `/bayar` page originally hard-404'd once the order it was querying flipped to `lunas` mid-flow (racing the client's post-payment receipt-print step). Fixed by making the page branch on order status instead of 404ing, and moving the print-failure notice to a blocking `alert()` so it can't be wiped by the race. See [payment-form.tsx](../src/components/payment-form.tsx) and [bayar/page.tsx](../src/app/(app)/meja/[id]/bayar/page.tsx).
 
 ## Phase 7 — Receipt Printing (`CETAK-2`)

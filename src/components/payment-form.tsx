@@ -7,6 +7,7 @@ import { createPayment } from "@/app/actions/orders";
 import { usePrinter } from "@/components/printer-provider";
 import { buildPaymentReceipt } from "@/lib/print/templates";
 import { formatRupiah, parseRupiah } from "@/lib/format";
+import RupiahKeypadInput from "@/components/rupiah-keypad-input";
 
 type Item = { id: string; nama_item: string; harga_saat_itu: number; qty: number };
 
@@ -108,16 +109,12 @@ export default function PaymentForm({
       </div>
 
       <form onSubmit={submit} className="space-y-3">
-        <label className="block">
+        <div>
           <span className="text-xs font-medium text-stone-500">Diskon (Rp atau kosongkan)</span>
-          <input
-            inputMode="numeric"
-            value={diskonInput}
-            onChange={(e) => setDiskonInput(e.target.value)}
-            placeholder="0"
-            className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-sm"
-          />
-        </label>
+          <div className="mt-1">
+            <RupiahKeypadInput value={diskonInput} onChange={setDiskonInput} placeholder="Rp 0" />
+          </div>
+        </div>
 
         <div className="flex gap-2">
           {(["tunai", "qris"] as const).map((m) => (
@@ -135,16 +132,12 @@ export default function PaymentForm({
         </div>
 
         {metode === "tunai" && (
-          <label className="block">
+          <div>
             <span className="text-xs font-medium text-stone-500">Uang diterima</span>
-            <input
-              required
-              inputMode="numeric"
-              value={bayarInput}
-              onChange={(e) => setBayarInput(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-sm"
-            />
-          </label>
+            <div className="mt-1">
+              <RupiahKeypadInput value={bayarInput} onChange={setBayarInput} placeholder="Uang diterima (Rp)" autoOpen />
+            </div>
+          </div>
         )}
 
         <div className="rounded-xl bg-stone-50 border border-stone-200 p-3 text-sm space-y-1">

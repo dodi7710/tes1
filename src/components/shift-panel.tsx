@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { closeShift, openShift } from "@/app/actions/shifts";
 import { formatRupiah, formatWaktu, parseRupiah } from "@/lib/format";
+import RupiahKeypadInput from "@/components/rupiah-keypad-input";
 
 type OpenShift = { id: string; modalAwal: number; waktuBuka: string; runningCash: number };
 
@@ -20,6 +21,10 @@ export default function ShiftPanel({ openShift: shift }: { openShift: OpenShift 
       startTransition(async () => {
         try {
           await openShift(parseRupiah(modalAwal));
+          // Clear any leftover close-shift summary from a previous shift —
+          // otherwise it flashes back once this new shift is also closed,
+          // since `result` isn't reset just by a new shift opening.
+          setResult(null);
         } catch (err) {
           setError(err instanceof Error ? err.message : "Gagal membuka shift");
         }
@@ -29,18 +34,13 @@ export default function ShiftPanel({ openShift: shift }: { openShift: OpenShift 
     return (
       <form onSubmit={submit} className="rounded-xl border border-amber-200 bg-amber-50 p-4 space-y-3">
         <p className="text-sm text-amber-900">Belum ada shift terbuka. Masukkan modal kas awal untuk mulai.</p>
-        <div className="flex gap-2">
-          <input
-            required
-            placeholder="Modal awal (Rp)"
-            inputMode="numeric"
-            value={modalAwal}
-            onChange={(e) => setModalAwal(e.target.value)}
-            className="flex-1 rounded-lg border border-stone-300 px-3 py-2 text-sm"
-          />
+        <div className="flex flex-col sm:flex-row gap-2 sm:items-start">
+          <div className="flex-1">
+            <RupiahKeypadInput value={modalAwal} onChange={setModalAwal} placeholder="Modal awal (Rp)" autoOpen />
+          </div>
           <button
-            disabled={isPending}
-            className="rounded-lg bg-amber-700 text-white px-4 py-2 text-sm font-medium disabled:opacity-50"
+            disabled={isPending || !modalAwal}
+            className="rounded-lg bg-amber-700 text-white px-4 py-2 text-sm font-medium disabled:opacity-50 whitespace-nowrap"
           >
             Buka Shift
           </button>
@@ -110,18 +110,13 @@ export default function ShiftPanel({ openShift: shift }: { openShift: OpenShift 
         className="space-y-2 border-t border-emerald-200 pt-3"
       >
         <p className="text-xs font-medium text-emerald-900">Tutup shift — hitung uang fisik di laci</p>
-        <div className="flex gap-2">
-          <input
-            required
-            placeholder="Uang fisik di laci (Rp)"
-            inputMode="numeric"
-            value={kasFisik}
-            onChange={(e) => setKasFisik(e.target.value)}
-            className="flex-1 rounded-lg border border-stone-300 px-3 py-2 text-sm"
-          />
+        <div className="flex flex-col sm:flex-row gap-2 sm:items-start">
+          <div className="flex-1">
+            <RupiahKeypadInput value={kasFisik} onChange={setKasFisik} placeholder="Uang fisik di laci (Rp)" />
+          </div>
           <button
-            disabled={isPending}
-            className="rounded-lg bg-stone-800 text-white px-4 py-2 text-sm font-medium disabled:opacity-50"
+            disabled={isPending || !kasFisik}
+            className="rounded-lg bg-stone-800 text-white px-4 py-2 text-sm font-medium disabled:opacity-50 whitespace-nowrap"
           >
             Tutup Shift
           </button>
