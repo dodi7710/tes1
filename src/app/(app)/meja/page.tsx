@@ -1,7 +1,10 @@
+// Hallmark · family: dashboard-grid · design-system: design.md
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getSessionProfile } from "@/lib/auth/session";
 import TableGrid from "@/components/table-grid";
+import PageHeader from "@/components/ui/page-header";
+import { buttonClasses } from "@/components/ui/button";
 
 export default async function MejaPage() {
   const supabase = await createClient();
@@ -19,14 +22,9 @@ export default async function MejaPage() {
     return (
       <main className="flex-1 flex items-center justify-center p-6">
         <div className="max-w-sm text-center space-y-3">
-          <h1 className="text-lg font-semibold text-stone-800">Belum ada shift terbuka</h1>
-          <p className="text-sm text-stone-500">
-            Buka shift dan masukkan modal kas awal sebelum melayani meja.
-          </p>
-          <Link
-            href="/shift"
-            className="inline-block rounded-lg bg-amber-700 text-white px-4 py-2 text-sm font-medium"
-          >
+          <h1 className="font-display text-lg font-semibold text-ink">Belum ada shift terbuka</h1>
+          <p className="text-sm text-ink-2">Buka shift dan masukkan modal kas awal sebelum melayani meja.</p>
+          <Link href="/shift" className={buttonClasses({ className: "inline-flex" })}>
             Buka Shift
           </Link>
         </div>
@@ -40,8 +38,8 @@ export default async function MejaPage() {
     .order("nomor");
 
   return (
-    <main className="flex-1 p-4">
-      <h1 className="text-xl font-semibold text-stone-800 mb-4">Meja</h1>
+    <main className="flex-1 p-4 space-y-4">
+      <PageHeader title="Meja" />
       <TableGrid tables={tables ?? []} />
     </main>
   );

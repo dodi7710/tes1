@@ -1,6 +1,13 @@
+// Hallmark · family: data-reports · design-system: design.md
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { formatRupiah, formatTanggal, formatWaktu } from "@/lib/format";
+import PageHeader from "@/components/ui/page-header";
+import StatTile from "@/components/ui/stat-tile";
+import Card from "@/components/ui/card";
+import { TableWrap, Table, Th, Tr, Td } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import Button from "@/components/ui/button";
 
 type Periode = "hari" | "minggu" | "bulan";
 
@@ -172,185 +179,171 @@ export default async function LaporanPage({
 
   return (
     <main className="flex-1 p-4 max-w-3xl w-full mx-auto space-y-8">
-      <div>
-        <h1 className="text-xl font-semibold text-stone-800 mb-1">Laporan</h1>
-        <div className="flex flex-wrap items-center gap-2 mt-2">
+      <div className="space-y-2">
+        <PageHeader title="Laporan" />
+        <div className="flex flex-wrap items-center gap-2">
           {(["hari", "minggu", "bulan"] as const).map((p) => (
             <Link
               key={p}
               href={`/laporan?periode=${p}`}
-              className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
-                !custom && periode === p ? "bg-amber-100 text-amber-900" : "text-stone-500 hover:bg-stone-100"
+              className={`min-h-10 flex items-center rounded-input px-3 text-sm font-medium transition-colors duration-short ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus ${
+                !custom && periode === p ? "bg-accent-2 text-accent" : "text-ink-2 hover:bg-paper-2"
               }`}
             >
               {p === "hari" ? "Hari ini" : p === "minggu" ? "Minggu ini" : "Bulan ini"}
             </Link>
           ))}
 
-          <form action="/laporan" className="flex items-center gap-1.5 pl-2 ml-1 border-l border-stone-200">
-            <input
-              type="date"
-              name="dari"
-              defaultValue={dari ?? ""}
-              required
-              className="rounded-lg border border-stone-300 px-2 py-1.5 text-sm"
-            />
-            <span className="text-stone-400 text-sm">–</span>
-            <input
-              type="date"
-              name="sampai"
-              defaultValue={sampai ?? ""}
-              required
-              className="rounded-lg border border-stone-300 px-2 py-1.5 text-sm"
-            />
-            <button
-              className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
-                custom ? "bg-amber-100 text-amber-900" : "bg-stone-100 text-stone-600 hover:bg-stone-200"
-              }`}
-            >
+          <form
+            action="/laporan"
+            className="flex flex-wrap items-center gap-1.5 sm:pl-2 sm:ml-1 sm:border-l sm:border-rule"
+          >
+            <Input type="date" name="dari" defaultValue={dari ?? ""} required className="min-h-10 w-36" />
+            <span className="text-ink-3 text-sm">–</span>
+            <Input type="date" name="sampai" defaultValue={sampai ?? ""} required className="min-h-10 w-36" />
+            <Button type="submit" variant={custom ? "primary" : "secondary"} size="sm">
               Terapkan
-            </button>
+            </Button>
           </form>
         </div>
         {dari && sampai && !custom && (
-          <p className="text-xs text-red-600 mt-1">
+          <p className="text-xs text-danger">
             Rentang tanggal tidak valid — pastikan tanggal akhir tidak sebelum tanggal awal.
           </p>
         )}
       </div>
 
       <section className="grid grid-cols-3 gap-3">
-        <div className="rounded-xl border border-stone-200 bg-white p-4">
-          <p className="text-xs text-stone-400">Omzet — {label}</p>
-          <p className="text-lg font-semibold text-stone-800 tabular-nums">{formatRupiah(omzetTotal)}</p>
-        </div>
-        <div className="rounded-xl border border-stone-200 bg-white p-4">
-          <p className="text-xs text-stone-400">Tunai</p>
-          <p className="text-lg font-semibold text-stone-800 tabular-nums">{formatRupiah(tunaiTotal)}</p>
-        </div>
-        <div className="rounded-xl border border-stone-200 bg-white p-4">
-          <p className="text-xs text-stone-400">QRIS</p>
-          <p className="text-lg font-semibold text-stone-800 tabular-nums">{formatRupiah(qrisTotal)}</p>
-        </div>
+        <StatTile label={`Omzet — ${label}`} value={formatRupiah(omzetTotal)} tone="accent" />
+        <StatTile label="Tunai" value={formatRupiah(tunaiTotal)} />
+        <StatTile label="QRIS" value={formatRupiah(qrisTotal)} />
       </section>
 
       <section>
-        <h2 className="font-medium text-stone-800 mb-3">Menu terlaris</h2>
-        <div className="rounded-xl border border-stone-200 bg-white divide-y divide-stone-100">
+        <h2 className="font-medium text-ink mb-3">Menu terlaris</h2>
+        <Card className="divide-y divide-rule-2">
           {bestSellersSorted.map(([nama, qty]) => (
             <div key={nama} className="flex justify-between px-4 py-2 text-sm">
               <span>{nama}</span>
-              <span className="tabular-nums font-medium">{qty}x</span>
+              <span className="font-numeric font-medium">{qty}x</span>
             </div>
           ))}
           {bestSellersSorted.length === 0 && (
-            <p className="px-4 py-4 text-sm text-stone-400">Belum ada penjualan pada periode ini.</p>
+            <p className="px-4 py-4 text-sm text-ink-3">Belum ada penjualan pada periode ini.</p>
           )}
-        </div>
+        </Card>
       </section>
 
       <section>
-        <h2 className="font-medium text-stone-800 mb-3">Omzet per meja</h2>
-        <div className="rounded-xl border border-stone-200 bg-white overflow-x-auto">
-          <table className="w-full text-sm">
+        <h2 className="font-medium text-ink mb-3">Omzet per meja</h2>
+        <TableWrap>
+          <Table>
             <thead>
-              <tr className="text-left text-xs uppercase tracking-wide text-stone-400 border-b border-stone-100">
-                <th className="px-4 py-2 font-medium">Meja</th>
-                <th className="px-4 py-2 font-medium text-right">Transaksi</th>
-                <th className="px-4 py-2 font-medium text-right">Omzet</th>
+              <tr>
+                <Th>Meja</Th>
+                <Th className="text-right">Transaksi</Th>
+                <Th className="text-right">Omzet</Th>
               </tr>
             </thead>
             <tbody>
               {perMejaSorted.map(([nomor, v]) => (
-                <tr key={nomor} className="border-b border-stone-50 last:border-0">
-                  <td className="px-4 py-2">Meja {nomor}</td>
-                  <td className="px-4 py-2 text-right tabular-nums">{v.jumlahTransaksi}</td>
-                  <td className="px-4 py-2 text-right tabular-nums">{formatRupiah(v.omzet)}</td>
-                </tr>
+                <Tr key={nomor}>
+                  <Td>Meja {nomor}</Td>
+                  <Td align="right" className="font-numeric">
+                    {v.jumlahTransaksi}
+                  </Td>
+                  <Td align="right" className="font-numeric">
+                    {formatRupiah(v.omzet)}
+                  </Td>
+                </Tr>
               ))}
               {perMejaSorted.length === 0 && (
                 <tr>
-                  <td colSpan={3} className="px-4 py-4 text-center text-stone-400">
+                  <Td colSpan={3} className="text-center text-ink-3 py-4">
                     Belum ada transaksi.
-                  </td>
+                  </Td>
                 </tr>
               )}
             </tbody>
-          </table>
-        </div>
+          </Table>
+        </TableWrap>
       </section>
 
       <section>
-        <h2 className="font-medium text-stone-800 mb-3">Riwayat transaksi per kasir</h2>
-        <div className="rounded-xl border border-stone-200 bg-white overflow-x-auto">
-          <table className="w-full text-sm">
+        <h2 className="font-medium text-ink mb-3">Riwayat transaksi per kasir</h2>
+        <TableWrap>
+          <Table>
             <thead>
-              <tr className="text-left text-xs uppercase tracking-wide text-stone-400 border-b border-stone-100">
-                <th className="px-4 py-2 font-medium">Kasir</th>
-                <th className="px-4 py-2 font-medium text-right">Jumlah transaksi</th>
-                <th className="px-4 py-2 font-medium text-right">Total</th>
+              <tr>
+                <Th>Kasir</Th>
+                <Th className="text-right">Jumlah transaksi</Th>
+                <Th className="text-right">Total</Th>
               </tr>
             </thead>
             <tbody>
               {[...perKasir.values()].map((v) => (
-                <tr key={v.nama} className="border-b border-stone-50 last:border-0">
-                  <td className="px-4 py-2">{v.nama}</td>
-                  <td className="px-4 py-2 text-right tabular-nums">{v.jumlah}</td>
-                  <td className="px-4 py-2 text-right tabular-nums">{formatRupiah(v.total)}</td>
-                </tr>
+                <Tr key={v.nama}>
+                  <Td>{v.nama}</Td>
+                  <Td align="right" className="font-numeric">
+                    {v.jumlah}
+                  </Td>
+                  <Td align="right" className="font-numeric">
+                    {formatRupiah(v.total)}
+                  </Td>
+                </Tr>
               ))}
               {perKasir.size === 0 && (
                 <tr>
-                  <td colSpan={3} className="px-4 py-4 text-center text-stone-400">
+                  <Td colSpan={3} className="text-center text-ink-3 py-4">
                     Belum ada transaksi.
-                  </td>
+                  </Td>
                 </tr>
               )}
             </tbody>
-          </table>
-        </div>
+          </Table>
+        </TableWrap>
       </section>
 
       <section>
-        <h2 className="font-medium text-stone-800 mb-3">Log pembatalan item</h2>
-        <div className="rounded-xl border border-stone-200 bg-white divide-y divide-stone-100">
+        <h2 className="font-medium text-ink mb-3">Log pembatalan item</h2>
+        <Card className="divide-y divide-rule-2">
           {voidRows.map((v) => (
             <div key={v.id} className="px-4 py-2 text-sm">
               <div className="flex justify-between">
                 <span>
                   {v.qty}x {v.nama_item}
                 </span>
-                <span className="text-stone-400">{formatWaktu(v.dibatalkan_pada)}</span>
+                <span className="text-ink-3">{formatWaktu(v.dibatalkan_pada)}</span>
               </div>
-              <p className="text-xs text-stone-400">
+              <p className="text-xs text-ink-3">
                 {v.profiles?.display_name ?? "-"} — {v.alasan_batal}
               </p>
             </div>
           ))}
           {voidRows.length === 0 && (
-            <p className="px-4 py-4 text-sm text-stone-400">Tidak ada pembatalan pada periode ini.</p>
+            <p className="px-4 py-4 text-sm text-ink-3">Tidak ada pembatalan pada periode ini.</p>
           )}
-        </div>
+        </Card>
       </section>
 
       <section>
-        <h2 className="font-medium text-stone-800 mb-3">Log meja dibatalkan</h2>
-        <div className="rounded-xl border border-stone-200 bg-white divide-y divide-stone-100">
+        <h2 className="font-medium text-ink mb-3">Log meja dibatalkan</h2>
+        <Card className="divide-y divide-rule-2">
           {cancelledOrderRows.map((c) => (
             <div key={c.id} className="px-4 py-2 text-sm">
               <div className="flex justify-between">
                 <span>Meja {c.tables?.nomor ?? "-"}</span>
-                <span className="text-stone-400">{formatWaktu(c.dibatalkan_pada)}</span>
+                <span className="text-ink-3">{formatWaktu(c.dibatalkan_pada)}</span>
               </div>
-              <p className="text-xs text-stone-400">
+              <p className="text-xs text-ink-3">
                 {c.profiles?.display_name ?? "-"} — {c.alasan_batal}
               </p>
             </div>
           ))}
           {cancelledOrderRows.length === 0 && (
-            <p className="px-4 py-4 text-sm text-stone-400">Tidak ada meja yang dibatalkan pada periode ini.</p>
+            <p className="px-4 py-4 text-sm text-ink-3">Tidak ada meja yang dibatalkan pada periode ini.</p>
           )}
-        </div>
+        </Card>
       </section>
     </main>
   );

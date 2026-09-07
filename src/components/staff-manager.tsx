@@ -1,7 +1,12 @@
+// Hallmark · family: crud-admin · design-system: design.md
 "use client";
 
 import { useState, useTransition } from "react";
 import { createKasirAccount, resetKasirPin, setKasirActive } from "@/app/actions/staff";
+import Card from "@/components/ui/card";
+import Button from "@/components/ui/button";
+import { Input, Select } from "@/components/ui/input";
+import Badge from "@/components/ui/badge";
 
 type Staff = { id: string; display_name: string; role: string; status_aktif: boolean };
 
@@ -39,26 +44,27 @@ export default function StaffManager({ staff, myId }: { staff: Staff[]; myId: st
   return (
     <div className="space-y-4">
       {error && (
-        <p className="rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm px-3 py-2">{error}</p>
+        <p className="rounded-input bg-danger-bg border border-danger/25 text-danger text-sm px-3 py-2">{error}</p>
       )}
       {createdPin && (
-        <p className="rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm px-3 py-2">
-          Akun <b>{createdPin.nama}</b> dibuat. PIN awal: <b className="tabular-nums">{createdPin.pin}</b> — sampaikan ke orangnya secara langsung.
+        <p className="rounded-input bg-success-bg border border-success/25 text-success text-sm px-3 py-2">
+          Akun <b>{createdPin.nama}</b> dibuat. PIN awal:{" "}
+          <b className="font-numeric">{createdPin.pin}</b> — sampaikan ke orangnya secara langsung.
         </p>
       )}
 
-      <ul className="rounded-xl border border-stone-200 bg-white divide-y divide-stone-100">
+      <Card as="ul" className="divide-y divide-rule-2">
         {staff.map((s) => (
           <li key={s.id} className="flex items-center gap-3 px-4 py-2.5">
-            <span className={`flex-1 text-sm ${s.status_aktif ? "text-stone-800" : "text-stone-400 line-through"}`}>
+            <span className={`flex-1 text-sm ${s.status_aktif ? "text-ink" : "text-ink-3 line-through"}`}>
               {s.display_name}
             </span>
-            <span className="text-xs uppercase tracking-wide text-stone-400">
+            <Badge tone={s.role === "pemilik" ? "accent" : "neutral"}>
               {s.role === "pemilik" ? "Pemilik" : "Kasir"}
-            </span>
+            </Badge>
             <button
               onClick={() => setResetTarget(resetTarget === s.id ? null : s.id)}
-              className="text-xs font-medium text-stone-500 hover:text-amber-700"
+              className="text-xs font-medium text-ink-2 hover:text-accent transition-colors duration-short ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus rounded-input px-1"
             >
               Reset PIN
             </button>
@@ -66,7 +72,7 @@ export default function StaffManager({ staff, myId }: { staff: Staff[]; myId: st
               <button
                 disabled={isPending}
                 onClick={() => run(() => setKasirActive(s.id, !s.status_aktif))}
-                className="text-xs font-medium text-stone-500 hover:text-amber-700 disabled:opacity-50"
+                className="text-xs font-medium text-ink-2 hover:text-accent disabled:opacity-50 transition-colors duration-short ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus rounded-input px-1"
               >
                 {s.status_aktif ? "Nonaktifkan" : "Aktifkan"}
               </button>
@@ -83,42 +89,28 @@ export default function StaffManager({ staff, myId }: { staff: Staff[]; myId: st
             )}
           </li>
         ))}
-      </ul>
+      </Card>
 
-      <form onSubmit={submitNew} className="rounded-xl border border-stone-200 bg-white p-4 space-y-3">
-        <h3 className="text-sm font-medium text-stone-800">Tambah akun baru</h3>
+      <Card as="form" onSubmit={submitNew} className="p-4 space-y-3">
+        <h3 className="text-sm font-medium text-ink">Tambah akun baru</h3>
         <div className="grid grid-cols-1 sm:grid-cols-[2fr_1fr_1fr_auto] gap-2">
-          <input
-            required
-            placeholder="Nama"
-            value={nama}
-            onChange={(e) => setNama(e.target.value)}
-            className="rounded-lg border border-stone-300 px-3 py-2 text-sm"
-          />
-          <select
-            value={role}
-            onChange={(e) => setRole(e.target.value as "kasir" | "pemilik")}
-            className="rounded-lg border border-stone-300 px-3 py-2 text-sm"
-          >
+          <Input required placeholder="Nama" value={nama} onChange={(e) => setNama(e.target.value)} />
+          <Select value={role} onChange={(e) => setRole(e.target.value as "kasir" | "pemilik")}>
             <option value="kasir">Kasir</option>
             <option value="pemilik">Pemilik</option>
-          </select>
-          <input
+          </Select>
+          <Input
             required
             placeholder="PIN awal (4-6 digit)"
             inputMode="numeric"
             value={pin}
             onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
-            className="rounded-lg border border-stone-300 px-3 py-2 text-sm"
           />
-          <button
-            disabled={isPending}
-            className="rounded-lg bg-amber-700 text-white px-4 py-2 text-sm font-medium disabled:opacity-50"
-          >
+          <Button type="submit" loading={isPending}>
             Buat akun
-          </button>
+          </Button>
         </div>
-      </form>
+      </Card>
     </div>
   );
 }
@@ -127,19 +119,16 @@ function ResetPinInline({ onSubmit }: { onSubmit: (pin: string) => void }) {
   const [pin, setPin] = useState("");
   return (
     <div className="flex items-center gap-2">
-      <input
+      <Input
         placeholder="PIN baru"
         inputMode="numeric"
         value={pin}
         onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
-        className="w-28 rounded-lg border border-stone-300 px-2 py-1 text-xs"
+        className="w-28 min-h-9 text-xs"
       />
-      <button
-        onClick={() => onSubmit(pin)}
-        className="rounded-lg bg-amber-700 text-white px-3 py-1 text-xs font-medium"
-      >
+      <Button size="sm" onClick={() => onSubmit(pin)}>
         Simpan
-      </button>
+      </Button>
     </div>
   );
 }

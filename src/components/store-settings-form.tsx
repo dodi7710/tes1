@@ -1,7 +1,11 @@
+// Hallmark · family: crud-admin · design-system: design.md
 "use client";
 
 import { useState, useTransition } from "react";
 import { updateStoreSettings } from "@/app/actions/settings";
+import Card from "@/components/ui/card";
+import Button from "@/components/ui/button";
+import { Input, Textarea } from "@/components/ui/input";
 
 export default function StoreSettingsForm({
   initial,
@@ -29,35 +33,22 @@ export default function StoreSettingsForm({
   }
 
   return (
-    <form onSubmit={submit} className="rounded-xl border border-stone-200 bg-white p-4 space-y-3">
+    <Card as="form" onSubmit={submit} className="p-4 space-y-3">
       <label className="block">
-        <span className="text-xs font-medium text-stone-500">Nama warung</span>
-        <input
-          value={nama}
-          onChange={(e) => setNama(e.target.value)}
-          required
-          className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-sm"
-        />
+        <span className="text-xs font-medium text-ink-2">Nama warung</span>
+        <Input value={nama} onChange={(e) => setNama(e.target.value)} required className="mt-1" />
       </label>
       <label className="block">
-        <span className="text-xs font-medium text-stone-500">Alamat</span>
-        <textarea
-          value={alamat}
-          onChange={(e) => setAlamat(e.target.value)}
-          rows={2}
-          className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-sm"
-        />
+        <span className="text-xs font-medium text-ink-2">Alamat</span>
+        <Textarea value={alamat} onChange={(e) => setAlamat(e.target.value)} rows={2} className="mt-1" />
       </label>
       <div className="flex items-center gap-3">
-        <button
-          disabled={isPending}
-          className="rounded-lg bg-amber-700 text-white px-4 py-2 text-sm font-medium disabled:opacity-50"
-        >
+        <Button type="submit" loading={isPending}>
           Simpan
-        </button>
-        {saved && <span className="text-sm text-emerald-600">Tersimpan.</span>}
-        {error && <span className="text-sm text-red-600">{error}</span>}
+        </Button>
+        {saved && <span className="text-sm text-success">Tersimpan.</span>}
+        {error && <span className="text-sm text-danger">{error}</span>}
       </div>
-    </form>
+    </Card>
   );
 }

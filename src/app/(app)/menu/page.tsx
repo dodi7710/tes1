@@ -1,5 +1,7 @@
+// Hallmark · family: crud-admin · design-system: design.md
 import { createClient } from "@/lib/supabase/server";
 import MenuManager from "@/components/menu-manager";
+import PageHeader from "@/components/ui/page-header";
 
 export default async function MenuPage() {
   const supabase = await createClient();
@@ -13,11 +15,11 @@ export default async function MenuPage() {
   ]);
 
   return (
-    <main className="flex-1 p-4 max-w-3xl w-full mx-auto">
-      <h1 className="text-xl font-semibold text-stone-800 mb-1">Kelola Menu</h1>
-      <p className="text-sm text-stone-500 mb-6">
-        Menu sederhana: nama dan satu harga tetap per item (tanpa varian/topping).
-      </p>
+    <main className="flex-1 p-4 max-w-3xl w-full mx-auto space-y-6">
+      <PageHeader
+        title="Kelola Menu"
+        subtitle="Menu sederhana: nama dan satu harga tetap per item (tanpa varian/topping)."
+      />
       <MenuManager categories={categories ?? []} items={items ?? []} />
     </main>
   );

@@ -1,7 +1,11 @@
+// Hallmark · family: transactional-workbench · design-system: design.md
 "use client";
 
 import { useState } from "react";
 import { formatRupiah } from "@/lib/format";
+import { inputClasses } from "@/components/ui/input";
+import NumericKeypad from "@/components/ui/numeric-keypad";
+import Button from "@/components/ui/button";
 
 /**
  * Numeric amount entry via an on-screen keypad instead of the device's own
@@ -37,53 +41,27 @@ export default function RupiahKeypadInput({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className={`w-full rounded-lg border px-3 py-2 text-sm text-left ${
-          open ? "border-amber-400 ring-1 ring-amber-400" : "border-stone-300"
-        } ${value ? "text-stone-800" : "text-stone-400"}`}
+        className={`${inputClasses} text-left ${open ? "border-accent ring-2 ring-accent/30" : ""} ${
+          value ? "text-ink" : "text-ink-3"
+        }`}
       >
         {value ? formatRupiah(parseInt(value, 10)) : placeholder}
       </button>
 
       {open && (
-        <div className="mt-2 grid grid-cols-3 gap-2 rounded-xl border border-stone-200 bg-white p-2">
-          {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((d) => (
-            <button
-              key={d}
-              type="button"
-              onClick={() => press(d)}
-              className="h-12 rounded-lg bg-stone-50 border border-stone-200 text-lg font-medium text-stone-800 active:bg-amber-50"
-            >
-              {d}
-            </button>
-          ))}
-          <button
-            type="button"
-            onClick={() => onChange("")}
-            className="h-12 rounded-lg bg-stone-50 border border-stone-200 text-xs font-medium text-stone-500 active:bg-amber-50"
-          >
-            Kosongkan
-          </button>
-          <button
-            type="button"
-            onClick={() => press("0")}
-            className="h-12 rounded-lg bg-stone-50 border border-stone-200 text-lg font-medium text-stone-800 active:bg-amber-50"
-          >
-            0
-          </button>
-          <button
-            type="button"
-            onClick={backspace}
-            className="h-12 rounded-lg bg-stone-50 border border-stone-200 text-xs font-medium text-stone-500 active:bg-amber-50"
-          >
-            Hapus
-          </button>
-          <button
-            type="button"
-            onClick={() => setOpen(false)}
-            className="col-span-3 h-10 rounded-lg bg-amber-700 text-white text-sm font-medium"
-          >
-            Selesai
-          </button>
+        <div className="mt-2 rounded-card border border-rule bg-surface p-2">
+          <NumericKeypad
+            dense
+            onDigit={press}
+            onBackspace={backspace}
+            backspaceLabel="Hapus"
+            slot10={{ label: "Kosongkan", onClick: () => onChange("") }}
+            footer={
+              <Button fullWidth size="sm" onClick={() => setOpen(false)}>
+                Selesai
+              </Button>
+            }
+          />
         </div>
       )}
     </div>

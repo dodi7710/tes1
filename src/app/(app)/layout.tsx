@@ -1,3 +1,4 @@
+// Hallmark · family: shell · design-system: design.md
 import { redirect } from "next/navigation";
 import { getSessionProfile } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
@@ -17,7 +18,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <PrinterProvider>
-      <div className="min-h-dvh flex flex-col bg-stone-50">
+      <div className="min-h-dvh flex flex-col bg-paper">
         <TopBar
           displayName={profile.display_name}
           role={profile.role}

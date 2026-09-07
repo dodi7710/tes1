@@ -1,0 +1,12 @@
+[
+  {
+    "date": "2026-09-07",
+    "scope": "app",
+    "genre": "modern-minimal",
+    "theme": "custom",
+    "theme_axes": "light / geometric-sans / cool (teal ~175°)",
+    "macrostructure": "app-native families: auth · dashboard-grid · transactional-workbench · crud-admin · data-reports",
+    "enrichment": "none",
+    "brief": "Kasir Warung Susu — full app redesign via hallmark redesign (multi-page), design.md-locked"
+  }
+]

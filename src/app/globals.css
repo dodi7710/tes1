@@ -1,26 +1,88 @@
+/* Hallmark · genre: modern-minimal · design-system: design.md · designed-as-app */
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  /* Color — see design.md § Theme for rationale */
+  --color-paper: oklch(97.5% 0.006 85);
+  --color-paper-2: oklch(95.5% 0.008 80);
+  --color-surface: oklch(99% 0.003 85);
+  --color-ink: oklch(21% 0.02 55);
+  --color-ink-2: oklch(46% 0.018 55);
+  --color-ink-3: oklch(62% 0.014 55);
+  --color-rule: oklch(89% 0.01 70);
+  --color-rule-2: oklch(93% 0.008 70);
+  --color-accent: oklch(52% 0.10 175);
+  --color-accent-ink: oklch(99% 0.005 175);
+  --color-accent-2: oklch(93% 0.03 175);
+  --color-focus: oklch(60% 0.17 260);
+  --color-success: oklch(55% 0.13 148);
+  --color-success-bg: oklch(95% 0.03 148);
+  --color-danger: oklch(54% 0.19 26);
+  --color-danger-bg: oklch(96% 0.03 26);
+  --color-warning: oklch(64% 0.14 75);
+  --color-warning-bg: oklch(95% 0.04 75);
+
+  /* Typography */
+  --font-display: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.563rem;
+  --text-2xl: 1.953rem;
+  --text-display: 2.441rem;
+
+  /* Spacing uses Tailwind's default numeric scale (p-4, gap-3, and so on)
+     — see design.md, Spacing section, for the 4pt scale's rem values as a
+     reference. We deliberately do NOT redefine named --spacing- keys here:
+     Tailwind v4 derives w, h, max-w, gap and inset utilities from that same
+     namespace, so a named key such as --spacing-2xl would silently shadow
+     the unrelated built-in max-w-2xl, w-2xl and similar utilities used
+     throughout this app. */
+
+  /* Radius */
+  --radius-card: 1rem;
+  --radius-input: 0.625rem;
+  --radius-pill: 999px;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.87, 0, 0.13, 1);
+  --duration-fast: 120ms;
+  --duration-short: 180ms;
+  --duration-med: 240ms;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  color-scheme: light;
+  overflow-x: clip;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  overflow-x: clip;
+}
+
+/* Numeric readouts (rupiah, PIN digits, timestamps) always use the mono
+   outlier with tabular figures — see design.md § Typography. */
+.font-numeric {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 150ms !important;
+    scroll-behavior: auto !important;
+  }
 }

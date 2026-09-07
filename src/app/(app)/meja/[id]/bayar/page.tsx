@@ -1,8 +1,10 @@
+// Hallmark · family: transactional-workbench · design-system: design.md
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getSessionProfile } from "@/lib/auth/session";
 import PaymentForm from "@/components/payment-form";
+import { buttonClasses } from "@/components/ui/button";
 
 export default async function BayarPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: mejaId } = await params;
@@ -30,9 +32,9 @@ export default async function BayarPage({ params }: { params: Promise<{ id: stri
     return (
       <main className="flex-1 flex items-center justify-center p-6">
         <div className="max-w-sm text-center space-y-3">
-          <h1 className="text-lg font-semibold text-stone-800">Meja {table.nomor} sudah dibayar</h1>
-          <p className="text-sm text-stone-500">Pesanan ini sudah lunas dan meja sudah dikosongkan.</p>
-          <Link href="/meja" className="inline-block rounded-lg bg-amber-700 text-white px-4 py-2 text-sm font-medium">
+          <h1 className="font-display text-lg font-semibold text-ink">Meja {table.nomor} sudah dibayar</h1>
+          <p className="text-sm text-ink-2">Pesanan ini sudah lunas dan meja sudah dikosongkan.</p>
+          <Link href="/meja" className={buttonClasses({ className: "inline-flex" })}>
             Kembali ke Meja
           </Link>
         </div>

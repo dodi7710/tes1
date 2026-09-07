@@ -1,13 +1,16 @@
+// Hallmark · family: transactional-workbench · design-system: design.md
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createPayment } from "@/app/actions/orders";
 import { usePrinter } from "@/components/printer-provider";
 import { buildPaymentReceipt } from "@/lib/print/templates";
 import { formatRupiah, parseRupiah } from "@/lib/format";
 import RupiahKeypadInput from "@/components/rupiah-keypad-input";
+import Card from "@/components/ui/card";
+import Button from "@/components/ui/button";
+import PageHeader from "@/components/ui/page-header";
 
 type Item = { id: string; nama_item: string; harga_saat_itu: number; qty: number };
 
@@ -87,94 +90,100 @@ export default function PaymentForm({
   }
 
   return (
-    <main className="flex-1 max-w-md w-full mx-auto p-4 space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-stone-800">Bayar — Meja {table.nomor}</h1>
-        <Link href={`/meja/${table.id}`} className="text-sm text-stone-500">
-          &larr; Kembali
-        </Link>
-      </div>
+    <main className="flex-1 max-w-4xl w-full mx-auto p-4 space-y-4">
+      <PageHeader title={`Bayar — Meja ${table.nomor}`} back={{ href: `/meja/${table.id}` }} />
 
       {error && (
-        <p className="rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm px-3 py-2">{error}</p>
+        <p className="rounded-input bg-danger-bg border border-danger/25 text-danger text-sm px-3 py-2">{error}</p>
       )}
 
-      <div className="rounded-xl border border-stone-200 bg-white divide-y divide-stone-100">
-        {items.map((i) => (
-          <div key={i.id} className="flex items-center gap-3 px-4 py-2 text-sm">
-            <span className="flex-1">{i.qty}x {i.nama_item}</span>
-            <span className="tabular-nums text-stone-600">{formatRupiah(i.qty * i.harga_saat_itu)}</span>
-          </div>
-        ))}
-      </div>
+      <form onSubmit={submit} className="flex flex-col lg:flex-row gap-4">
+        {/* Scrolling zone — items, discount, method, amount entry */}
+        <div className="flex-1 min-w-0 space-y-3">
+          <Card className="divide-y divide-rule-2">
+            {items.map((i) => (
+              <div key={i.id} className="flex items-center gap-3 px-4 py-2 text-sm">
+                <span className="flex-1">
+                  {i.qty}x {i.nama_item}
+                </span>
+                <span className="font-numeric text-ink-2">{formatRupiah(i.qty * i.harga_saat_itu)}</span>
+              </div>
+            ))}
+          </Card>
 
-      <form onSubmit={submit} className="space-y-3">
-        <div>
-          <span className="text-xs font-medium text-stone-500">Diskon (Rp atau kosongkan)</span>
-          <div className="mt-1">
-            <RupiahKeypadInput value={diskonInput} onChange={setDiskonInput} placeholder="Rp 0" />
-          </div>
-        </div>
-
-        <div className="flex gap-2">
-          {(["tunai", "qris"] as const).map((m) => (
-            <button
-              key={m}
-              type="button"
-              onClick={() => setMetode(m)}
-              className={`flex-1 rounded-lg border py-2 text-sm font-medium ${
-                metode === m ? "border-amber-600 bg-amber-50 text-amber-800" : "border-stone-200 text-stone-600"
-              }`}
-            >
-              {m === "tunai" ? "Tunai" : "QRIS"}
-            </button>
-          ))}
-        </div>
-
-        {metode === "tunai" && (
           <div>
-            <span className="text-xs font-medium text-stone-500">Uang diterima</span>
+            <span className="text-xs font-medium text-ink-2">Diskon (Rp atau kosongkan)</span>
             <div className="mt-1">
-              <RupiahKeypadInput value={bayarInput} onChange={setBayarInput} placeholder="Uang diterima (Rp)" autoOpen />
+              <RupiahKeypadInput value={diskonInput} onChange={setDiskonInput} placeholder="Rp 0" />
             </div>
           </div>
-        )}
 
-        <div className="rounded-xl bg-stone-50 border border-stone-200 p-3 text-sm space-y-1">
-          <div className="flex justify-between text-stone-500">
-            <span>Subtotal</span>
-            <span className="tabular-nums">{formatRupiah(subtotal)}</span>
+          <div className="flex gap-2">
+            {(["tunai", "qris"] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setMetode(m)}
+                className={`flex-1 min-h-12 rounded-input border text-sm font-medium transition-colors duration-short ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus ${
+                  metode === m ? "border-accent bg-accent-2 text-accent" : "border-rule text-ink-2"
+                }`}
+              >
+                {m === "tunai" ? "Tunai" : "QRIS"}
+              </button>
+            ))}
           </div>
-          {diskon > 0 && (
-            <div className="flex justify-between text-stone-500">
-              <span>Diskon</span>
-              <span className="tabular-nums">-{formatRupiah(diskon)}</span>
-            </div>
-          )}
-          <div className="flex justify-between font-semibold text-stone-800 text-base">
-            <span>Total</span>
-            <span className="tabular-nums">{formatRupiah(total)}</span>
-          </div>
-          {metode === "tunai" && bayarInput && (
-            <div className="flex justify-between text-emerald-700 font-medium">
-              <span>Kembalian</span>
-              <span className="tabular-nums">{formatRupiah(kembalian)}</span>
+
+          {metode === "tunai" && (
+            <div>
+              <span className="text-xs font-medium text-ink-2">Uang diterima</span>
+              <div className="mt-1">
+                <RupiahKeypadInput value={bayarInput} onChange={setBayarInput} placeholder="Uang diterima (Rp)" autoOpen />
+              </div>
             </div>
           )}
         </div>
 
-        {!printer.deviceName && (
-          <p className="text-xs text-stone-400">
-            Printer belum tersambung — sambungkan dari pojok kanan atas sebelum bayar agar struk otomatis cetak.
-          </p>
-        )}
+        {/* Persistent rail — totals + submit */}
+        <aside className="lg:w-72 shrink-0 space-y-3 lg:sticky lg:top-20 lg:self-start">
+          <Card className="p-3 text-sm space-y-1">
+            <div className="flex justify-between text-ink-2">
+              <span>Subtotal</span>
+              <span className="font-numeric">{formatRupiah(subtotal)}</span>
+            </div>
+            {diskon > 0 && (
+              <div className="flex justify-between text-ink-2">
+                <span>Diskon</span>
+                <span className="font-numeric">-{formatRupiah(diskon)}</span>
+              </div>
+            )}
+            <div className="flex justify-between font-semibold text-ink text-base">
+              <span>Total</span>
+              <span className="font-numeric">{formatRupiah(total)}</span>
+            </div>
+            {metode === "tunai" && bayarInput && (
+              <div className="flex justify-between text-success font-medium">
+                <span>Kembalian</span>
+                <span className="font-numeric">{formatRupiah(kembalian)}</span>
+              </div>
+            )}
+          </Card>
 
-        <button
-          disabled={isPending || (metode === "tunai" && bayar < total)}
-          className="w-full rounded-xl bg-amber-700 text-white py-3 text-sm font-semibold disabled:opacity-50"
-        >
-          Selesaikan Pembayaran
-        </button>
+          {!printer.deviceName && (
+            <p className="text-xs text-ink-3">
+              Printer belum tersambung — sambungkan dari pojok kanan atas sebelum bayar agar struk otomatis cetak.
+            </p>
+          )}
+
+          <Button
+            type="submit"
+            fullWidth
+            size="lg"
+            loading={isPending}
+            disabled={metode === "tunai" && bayar < total}
+          >
+            Selesaikan Pembayaran
+          </Button>
+        </aside>
       </form>
     </main>
   );
