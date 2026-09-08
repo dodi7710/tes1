@@ -174,7 +174,7 @@ export default function OrderDetail({
         />
       )}
 
-      <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-0">
+      <div className="flex flex-col md:flex-row gap-4 flex-1 min-h-0">
         {/* Scrolling zone — item list, void/cancel disclosures, menu picker */}
         <div className="flex-1 min-w-0 space-y-4">
           <Card className="divide-y divide-rule-2">
@@ -275,7 +275,7 @@ export default function OrderDetail({
         </div>
 
         {/* Persistent rail — kitchen ticket, total, primary CTA */}
-        <aside className="lg:w-80 shrink-0 space-y-3 lg:sticky lg:top-20 lg:self-start">
+        <aside className="md:w-80 shrink-0 space-y-3 md:sticky md:top-20 md:self-start">
           {unprinted.length > 0 && (
             <Button
               variant="secondary"

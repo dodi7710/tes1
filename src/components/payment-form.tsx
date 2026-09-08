@@ -97,7 +97,7 @@ export default function PaymentForm({
         <p className="rounded-input bg-danger-bg border border-danger/25 text-danger text-sm px-3 py-2">{error}</p>
       )}
 
-      <form onSubmit={submit} className="flex flex-col lg:flex-row gap-4">
+      <form onSubmit={submit} className="flex flex-col md:flex-row gap-4">
         {/* Scrolling zone — items, discount, method, amount entry */}
         <div className="flex-1 min-w-0 space-y-3">
           <Card className="divide-y divide-rule-2">
@@ -144,7 +144,7 @@ export default function PaymentForm({
         </div>
 
         {/* Persistent rail — totals + submit */}
-        <aside className="lg:w-72 shrink-0 space-y-3 lg:sticky lg:top-20 lg:self-start">
+        <aside className="md:w-72 shrink-0 space-y-3 md:sticky md:top-20 md:self-start">
           <Card className="p-3 text-sm space-y-1">
             <div className="flex justify-between text-ink-2">
               <span>Subtotal</span>
