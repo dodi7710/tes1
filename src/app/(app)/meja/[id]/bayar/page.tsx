@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getSessionProfile } from "@/lib/auth/session";
 import PaymentForm from "@/components/payment-form";
-import { buttonClasses } from "@/components/ui/button";
+import { buttonClasses } from "@/components/ui/button-classes";
 
 export default async function BayarPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: mejaId } = await params;

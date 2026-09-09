@@ -3,38 +3,12 @@
 "use client";
 
 import { forwardRef, type ButtonHTMLAttributes } from "react";
+import { buttonClasses, type Size, type Variant } from "./button-classes";
 
-type Variant = "primary" | "secondary" | "ghost" | "destructive";
-type Size = "sm" | "md" | "lg";
-
-export function buttonClasses({
-  variant = "primary",
-  size = "md",
-  fullWidth = false,
-  className = "",
-}: {
-  variant?: Variant;
-  size?: Size;
-  fullWidth?: boolean;
-  className?: string;
-} = {}) {
-  const base =
-    "inline-flex items-center justify-center gap-2 rounded-input font-medium transition duration-short ease-out active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-paper";
-  const sizes: Record<Size, string> = {
-    sm: "min-h-10 px-3 text-sm",
-    md: "min-h-12 px-4 text-sm",
-    lg: "min-h-12 px-6 text-base",
-  };
-  const variants: Record<Variant, string> = {
-    primary: "bg-accent text-accent-ink hover:brightness-105 active:brightness-95",
-    secondary: "border border-rule bg-surface text-ink hover:bg-paper-2",
-    ghost: "text-ink-2 hover:bg-paper-2",
-    destructive: "border border-danger/30 text-danger hover:bg-danger-bg",
-  };
-  return [base, sizes[size], variants[variant], fullWidth ? "w-full" : "", className]
-    .filter(Boolean)
-    .join(" ");
-}
+// Re-exported so existing Client Component imports of `{ buttonClasses }`
+// from "./button" keep working. Server Components must import it from
+// "./button-classes" directly — see that file for why.
+export { buttonClasses } from "./button-classes";
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: Variant;

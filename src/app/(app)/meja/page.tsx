@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getSessionProfile } from "@/lib/auth/session";
 import TableGrid from "@/components/table-grid";
 import PageHeader from "@/components/ui/page-header";
-import { buttonClasses } from "@/components/ui/button";
+import { buttonClasses } from "@/components/ui/button-classes";
 
 export default async function MejaPage() {
   const supabase = await createClient();
