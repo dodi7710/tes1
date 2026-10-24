@@ -36,6 +36,7 @@ export type Database = {
       menu_items: {
         Row: {
           created_at: string
+          foto_url: string | null
           harga: number
           id: string
           kategori_id: string | null
@@ -44,6 +45,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          foto_url?: string | null
           harga: number
           id?: string
           kategori_id?: string | null
@@ -52,6 +54,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          foto_url?: string | null
           harga?: number
           id?: string
           kategori_id?: string | null

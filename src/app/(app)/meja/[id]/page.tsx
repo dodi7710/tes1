@@ -27,7 +27,7 @@ export default async function MejaDetailPage({ params }: { params: Promise<{ id:
     supabase.from("menu_categories").select("id, nama, urutan").order("urutan"),
     supabase
       .from("menu_items")
-      .select("id, nama, harga, kategori_id")
+      .select("id, nama, harga, kategori_id, foto_url")
       .eq("status_aktif", true)
       .order("nama"),
   ]);

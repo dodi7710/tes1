@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import PageHeader from "@/components/ui/page-header";
 import ConfirmDisclosure from "@/components/ui/confirm-disclosure";
 import Link from "next/link";
+import ProductPhoto from "@/components/product-photo";
 
 type Item = {
   id: string;
@@ -25,7 +26,7 @@ type Item = {
   catatan: string | null;
 };
 type Category = { id: string; nama: string; urutan: number };
-type MenuItem = { id: string; nama: string; harga: number; kategori_id: string | null };
+type MenuItem = { id: string; nama: string; harga: number; kategori_id: string | null; foto_url: string | null };
 
 export default function OrderDetail({
   table,
@@ -327,10 +328,13 @@ function MenuTile({
     <button
       disabled={disabled}
       onClick={onSelect}
-      className="rounded-input border border-rule px-3 py-2 text-left text-sm hover:border-accent/50 transition-colors duration-short ease-out disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+      className="overflow-hidden rounded-input border border-rule text-left text-sm hover:border-accent/50 transition-colors duration-short ease-out disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
     >
-      <div className="font-medium text-ink">{item.nama}</div>
-      <div className="font-numeric text-xs text-ink-3">{formatRupiah(item.harga)}</div>
+      <ProductPhoto src={item.foto_url} alt="" className="aspect-[4/3] w-full" sizes="(min-width: 640px) 200px, 45vw" />
+      <div className="px-3 py-2">
+        <div className="font-medium text-ink">{item.nama}</div>
+        <div className="font-numeric text-xs text-ink-3">{formatRupiah(item.harga)}</div>
+      </div>
     </button>
   );
 }
@@ -351,8 +355,9 @@ function AddItemPanel({
 
   return (
     <Card className="bg-accent-2/40 border-accent/30 p-4 space-y-3">
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex items-center gap-3">
+        <ProductPhoto src={menuItem.foto_url} alt="" className="size-12 shrink-0 rounded-input" />
+        <div className="flex-1">
           <p className="font-medium text-ink">{menuItem.nama}</p>
           <p className="font-numeric text-xs text-ink-2">{formatRupiah(menuItem.harga)} / item</p>
         </div>

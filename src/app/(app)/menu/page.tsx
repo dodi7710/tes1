@@ -10,7 +10,7 @@ export default async function MenuPage() {
     supabase.from("menu_categories").select("id, nama, urutan").order("urutan"),
     supabase
       .from("menu_items")
-      .select("id, nama, harga, kategori_id, status_aktif")
+      .select("id, nama, harga, kategori_id, status_aktif, foto_url")
       .order("nama"),
   ]);
 
@@ -18,7 +18,7 @@ export default async function MenuPage() {
     <main className="flex-1 p-4 max-w-3xl w-full mx-auto space-y-6">
       <PageHeader
         title="Kelola Menu"
-        subtitle="Menu sederhana: nama dan satu harga tetap per item (tanpa varian/topping)."
+        subtitle="Satu nama, satu harga, dan foto per item. Ketuk kotak foto untuk menambah atau mengganti foto."
       />
       <MenuManager categories={categories ?? []} items={items ?? []} />
     </main>
