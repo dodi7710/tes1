@@ -10,7 +10,6 @@ import { buttonClasses } from "@/components/ui/button-classes";
 
 const FILTERS = [
   { key: "aktif", label: "Perlu diproses" },
-  { key: "belum_bayar", label: "Menunggu bayar" },
   { key: "lunas", label: "Siap diambil" },
   { key: "diambil", label: "Selesai" },
   { key: "batal", label: "Batal" },
@@ -29,8 +28,8 @@ export default async function PesananPage({ searchParams }: { searchParams: Prom
     .order("dibuka_pada", { ascending: filter === "aktif" })
     .limit(100);
 
-  if (filter === "aktif") query = query.or("status.eq.terbuka,and(status.eq.lunas,diambil_pada.is.null)");
-  else if (filter === "belum_bayar") query = query.eq("status", "terbuka");
+  // Paid orders waiting for pickup belong only in "Siap diambil", not here.
+  if (filter === "aktif") query = query.eq("status", "terbuka");
   else if (filter === "lunas") query = query.eq("status", "lunas").is("diambil_pada", null);
   else if (filter === "diambil") query = query.eq("status", "lunas").not("diambil_pada", "is", null);
   else query = query.eq("status", "dibatalkan");
