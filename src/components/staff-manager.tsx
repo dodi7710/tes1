@@ -20,11 +20,13 @@ export default function StaffManager({ staff, myId }: { staff: Staff[]; myId: st
   const [pin, setPin] = useState("");
   const [createdPin, setCreatedPin] = useState<{ nama: string; pin: string } | null>(null);
 
-  function run(fn: () => Promise<unknown>) {
+  function run(action: () => Promise<{ error?: string }>, onSuccess?: () => void) {
     setError(null);
     startTransition(async () => {
       try {
-        await fn();
+        const { error } = await action();
+        if (error) setError(error);
+        else onSuccess?.();
       } catch (e) {
         setError(e instanceof Error ? e.message : "Gagal");
       }
@@ -33,12 +35,15 @@ export default function StaffManager({ staff, myId }: { staff: Staff[]; myId: st
 
   function submitNew(e: React.FormEvent) {
     e.preventDefault();
-    run(async () => {
-      await createKasirAccount(nama, role, pin);
-      setCreatedPin({ nama, pin });
-      setNama("");
-      setPin("");
-    });
+    setCreatedPin(null);
+    run(
+      () => createKasirAccount(nama, role, pin),
+      () => {
+        setCreatedPin({ nama, pin });
+        setNama("");
+        setPin("");
+      },
+    );
   }
 
   return (
@@ -80,10 +85,10 @@ export default function StaffManager({ staff, myId }: { staff: Staff[]; myId: st
             {resetTarget === s.id && (
               <ResetPinInline
                 onSubmit={(newPin) =>
-                  run(async () => {
-                    await resetKasirPin(s.id, newPin);
-                    setResetTarget(null);
-                  })
+                  run(
+                    () => resetKasirPin(s.id, newPin),
+                    () => setResetTarget(null),
+                  )
                 }
               />
             )}

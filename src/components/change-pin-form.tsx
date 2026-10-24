@@ -19,7 +19,11 @@ export default function ChangePinForm() {
     setError(null);
     startTransition(async () => {
       try {
-        await changeOwnPin(pin);
+        const { error: pinError } = await changeOwnPin(pin);
+        if (pinError) {
+          setError(pinError);
+          return;
+        }
         setSaved(true);
         setPin("");
       } catch (err) {

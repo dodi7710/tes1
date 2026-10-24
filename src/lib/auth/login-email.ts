@@ -7,3 +7,13 @@
 export function loginEmailFor(profileId: string): string {
   return `${profileId}@kasir.local`;
 }
+
+/**
+ * Supabase Auth rejects passwords shorter than 6 characters (and the minimum
+ * can't be lowered below 6), but staff PINs may be 4 digits. So the stored
+ * password is the PIN behind a fixed prefix. Accounts created before this
+ * stored the raw PIN — the login form falls back to that.
+ */
+export function pinToPassword(pin: string): string {
+  return `pin-${pin}`;
+}

@@ -3,7 +3,7 @@
 
 import { useState, useTransition } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { loginEmailFor } from "@/lib/auth/login-email";
+import { loginEmailFor, pinToPassword } from "@/lib/auth/login-email";
 import Card from "@/components/ui/card";
 import Badge from "@/components/ui/badge";
 import NumericKeypad from "@/components/ui/numeric-keypad";
@@ -37,10 +37,16 @@ export default function LoginForm({ staff }: { staff: Staff[] }) {
     if (!selected || pinValue.length < 4) return;
     startTransition(async () => {
       const supabase = createClient();
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: loginEmailFor(selected.id),
-        password: pinValue,
+      const email = loginEmailFor(selected.id);
+      let { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password: pinToPassword(pinValue),
       });
+      // Accounts made before pinToPassword stored the raw PIN (always 6 digits,
+      // since Supabase refused anything shorter).
+      if (signInError && pinValue.length >= 6) {
+        ({ error: signInError } = await supabase.auth.signInWithPassword({ email, password: pinValue }));
+      }
       if (signInError) {
         setError("PIN salah. Coba lagi.");
         setPin("");
