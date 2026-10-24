@@ -270,7 +270,7 @@ function PhotoButton({ item, runAction }: { item: Item; runAction: (fn: () => Pr
         <ProductPhoto
           src={item.foto_url}
           alt=""
-          className={`size-11 rounded-input ${item.foto_url ? "" : "border border-dashed border-rule"} ${uploading ? "opacity-40" : ""}`}
+          className={`h-14 w-11 rounded-input ${item.foto_url ? "" : "border border-dashed border-rule"} ${uploading ? "opacity-40" : ""}`}
         />
         {uploading && (
           <span className="absolute inset-0 grid place-items-center text-[10px] font-medium text-ink">…</span>

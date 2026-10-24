@@ -330,7 +330,7 @@ function MenuTile({
       onClick={onSelect}
       className="overflow-hidden rounded-input border border-rule text-left text-sm hover:border-accent/50 transition-colors duration-short ease-out disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
     >
-      <ProductPhoto src={item.foto_url} alt="" className="aspect-[4/3] w-full" sizes="(min-width: 640px) 200px, 45vw" />
+      <ProductPhoto src={item.foto_url} alt="" className="aspect-square w-full" sizes="(min-width: 640px) 200px, 45vw" />
       <div className="px-3 py-2">
         <div className="font-medium text-ink">{item.nama}</div>
         <div className="font-numeric text-xs text-ink-3">{formatRupiah(item.harga)}</div>

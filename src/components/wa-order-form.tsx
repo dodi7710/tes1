@@ -217,7 +217,7 @@ function ProductQtyTile({
         aria-label={`Tambah ${product.nama}`}
         className="block w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
       >
-        <ProductPhoto src={product.foto_url} alt="" className="aspect-[4/3] w-full" sizes="(min-width: 640px) 200px, 45vw" />
+        <ProductPhoto src={product.foto_url} alt="" className="aspect-square w-full" sizes="(min-width: 640px) 200px, 45vw" />
         <div className="px-3 pt-2">
           <div className="font-medium text-ink leading-snug">{product.nama}</div>
           <div className="font-numeric text-xs text-ink-3">{formatRupiah(product.harga)}</div>

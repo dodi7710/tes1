@@ -18,17 +18,21 @@ export async function compressImage(file: File, maxSide = 800, quality = 0.8): P
   canvas.height = height;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Browser tidak mendukung pengolahan foto");
-  // White backdrop so transparent PNGs don't turn black as JPEG.
-  ctx.fillStyle = "#fff";
-  ctx.fillRect(0, 0, width, height);
   ctx.drawImage(bitmap, 0, 0, width, height);
   bitmap.close();
 
   const encode = (type: string) =>
     new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, type, quality));
+  // WebP keeps transparency, so background-removed PNGs stay transparent.
   // Browsers that can't encode WebP silently fall back to PNG, so check the result type.
   let blob = await encode("image/webp");
-  if (!blob || blob.type !== "image/webp") blob = await encode("image/jpeg");
+  if (!blob || blob.type !== "image/webp") {
+    // White backdrop so transparent PNGs don't turn black as JPEG.
+    ctx.globalCompositeOperation = "destination-over";
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, width, height);
+    blob = await encode("image/jpeg");
+  }
   if (!blob) throw new Error("Gagal memproses foto");
 
   const ext = blob.type === "image/webp" ? "webp" : "jpg";
