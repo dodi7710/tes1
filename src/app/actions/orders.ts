@@ -126,9 +126,11 @@ export async function cancelOrder(orderId: string, alasan: string) {
     .eq("id", orderId);
   if (error) throw new Error(error.message);
 
-  await supabase.from("tables").update({ status: "kosong" }).eq("id", order.meja_id);
+  // Pesanan WA has no table to free.
+  if (order.meja_id) await supabase.from("tables").update({ status: "kosong" }).eq("id", order.meja_id);
 
   revalidatePath("/meja");
+  revalidatePath("/pesanan");
   revalidatePath("/laporan");
 }
 
@@ -151,6 +153,7 @@ export async function createPayment(input: {
     .single();
   if (orderErr || !order) throw new Error("Pesanan tidak ditemukan");
   if (order.status !== "terbuka") throw new Error("Pesanan sudah lunas");
+  if (!order.meja_id) throw new Error("Pesanan WA dibayar lewat halaman Pesanan WA");
 
   const { data: items, error: itemsErr } = await supabase
     .from("order_items")

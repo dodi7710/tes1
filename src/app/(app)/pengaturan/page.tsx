@@ -11,7 +11,11 @@ export default async function PengaturanPage() {
   const me = await getSessionProfile();
 
   const [{ data: settings }, { data: staff }] = await Promise.all([
-    supabase.from("store_settings").select("nama_warung, alamat").eq("id", 1).single(),
+    supabase
+      .from("store_settings")
+      .select("nama_warung, alamat, alamat_ambil, info_pembayaran_wa")
+      .eq("id", 1)
+      .single(),
     supabase.from("profiles").select("id, display_name, role, status_aktif").order("display_name"),
   ]);
 
@@ -20,8 +24,8 @@ export default async function PengaturanPage() {
       <PageHeader title="Pengaturan" subtitle="Data toko untuk struk, dan akun staff." />
 
       <section>
-        <h2 className="font-medium text-ink mb-3">Data toko (untuk struk)</h2>
-        <StoreSettingsForm initial={settings ?? { nama_warung: "", alamat: "" }} />
+        <h2 className="font-medium text-ink mb-3">Data toko (struk dan pesan WA)</h2>
+        <StoreSettingsForm initial={settings ?? { nama_warung: "", alamat: "", alamat_ambil: "", info_pembayaran_wa: "" }} />
       </section>
 
       <section>

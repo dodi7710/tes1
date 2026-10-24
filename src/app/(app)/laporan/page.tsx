@@ -63,7 +63,7 @@ export default async function LaporanPage({
   const [{ data: payments }, { data: paidOrders }, { data: voids }, { data: cancelledOrders }] = await Promise.all([
     supabase
       .from("payments")
-      .select("id, metode, total, dibuat_pada, kasir_id, profiles(display_name)")
+      .select("id, metode, total, dibuat_pada, kasir_id, profiles(display_name), orders(jenis)")
       .gte("dibuat_pada", start.toISOString())
       .lte("dibuat_pada", end.toISOString())
       .order("dibuat_pada", { ascending: false }),
@@ -82,7 +82,7 @@ export default async function LaporanPage({
       .order("dibatalkan_pada", { ascending: false }),
     supabase
       .from("orders")
-      .select("id, alasan_batal, dibatalkan_pada, tables(nomor), profiles!orders_dibatalkan_oleh_fkey(display_name)")
+      .select("id, kode, alasan_batal, dibatalkan_pada, tables(nomor), profiles!orders_dibatalkan_oleh_fkey(display_name)")
       .eq("status", "dibatalkan")
       .gte("dibatalkan_pada", start.toISOString())
       .lte("dibatalkan_pada", end.toISOString())
@@ -96,11 +96,27 @@ export default async function LaporanPage({
     dibuat_pada: string;
     kasir_id: string;
     profiles: { display_name: string } | null;
+    orders: { jenis: string } | null;
   }[];
 
   const omzetTotal = paymentRows.reduce((s, p) => s + Number(p.total), 0);
   const tunaiTotal = paymentRows.filter((p) => p.metode === "tunai").reduce((s, p) => s + Number(p.total), 0);
   const qrisTotal = paymentRows.filter((p) => p.metode === "qris").reduce((s, p) => s + Number(p.total), 0);
+  const transferTotal = paymentRows.filter((p) => p.metode === "transfer").reduce((s, p) => s + Number(p.total), 0);
+
+  // LAP-7: dine-in vs pesanan WA.
+  const perKanal = { dine_in: { jumlah: 0, total: 0 }, wa: { jumlah: 0, total: 0 } };
+  for (const p of paymentRows) {
+    const k = p.orders?.jenis === "wa" ? "wa" : "dine_in";
+    perKanal[k].jumlah += 1;
+    perKanal[k].total += Number(p.total);
+  }
+
+  const { count: waPerluDiproses } = await supabase
+    .from("orders")
+    .select("id", { count: "exact", head: true })
+    .eq("jenis", "wa")
+    .or("status.eq.terbuka,and(status.eq.lunas,diambil_pada.is.null)");
 
   const perKasir = new Map<string, { nama: string; total: number; jumlah: number }>();
   for (const p of paymentRows) {
@@ -147,13 +163,15 @@ export default async function LaporanPage({
     orders: { meja_id: string; tables: { nomor: number } | null } | null;
   };
   for (const raw of (orderItemsWithPrice ?? []) as unknown as ItemWithOrder[]) {
-    const nomor = raw.orders?.tables?.nomor ?? 0;
+    if (!raw.orders?.tables) continue; // pesanan WA has no table
+    const nomor = raw.orders.tables.nomor;
     const entry = perMeja.get(nomor) ?? { jumlahTransaksi: 0, omzet: 0 };
     entry.omzet += raw.qty * Number(raw.harga_saat_itu);
     perMeja.set(nomor, entry);
   }
   for (const o of orderRows) {
-    const nomor = o.tables?.nomor ?? 0;
+    if (!o.tables) continue;
+    const nomor = o.tables.nomor;
     const entry = perMeja.get(nomor) ?? { jumlahTransaksi: 0, omzet: 0 };
     entry.jumlahTransaksi += 1;
     perMeja.set(nomor, entry);
@@ -171,6 +189,7 @@ export default async function LaporanPage({
 
   const cancelledOrderRows = (cancelledOrders ?? []) as unknown as {
     id: string;
+    kode: string | null;
     alasan_batal: string | null;
     dibatalkan_pada: string;
     tables: { nomor: number } | null;
@@ -213,14 +232,56 @@ export default async function LaporanPage({
         )}
       </div>
 
-      <section className="grid grid-cols-3 gap-3">
+      <section className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <StatTile label={`Omzet — ${label}`} value={formatRupiah(omzetTotal)} tone="accent" />
-        <StatTile label="Tunai" value={formatRupiah(tunaiTotal)} />
+        <StatTile label="Tunai / COD" value={formatRupiah(tunaiTotal)} />
         <StatTile label="QRIS" value={formatRupiah(qrisTotal)} />
+        <StatTile label="Transfer" value={formatRupiah(transferTotal)} />
       </section>
 
       <section>
-        <h2 className="font-medium text-ink mb-3">Menu terlaris</h2>
+        <h2 className="font-medium text-ink mb-3">Per kanal</h2>
+        <TableWrap>
+          <Table>
+            <thead>
+              <tr>
+                <Th>Kanal</Th>
+                <Th className="text-right">Transaksi</Th>
+                <Th className="text-right">Omzet</Th>
+              </tr>
+            </thead>
+            <tbody>
+              {(
+                [
+                  ["Dine-in (meja)", perKanal.dine_in],
+                  ["Pesanan WA", perKanal.wa],
+                ] as const
+              ).map(([nama, v]) => (
+                <Tr key={nama}>
+                  <Td>{nama}</Td>
+                  <Td align="right" className="font-numeric">
+                    {v.jumlah}
+                  </Td>
+                  <Td align="right" className="font-numeric">
+                    {formatRupiah(v.total)}
+                  </Td>
+                </Tr>
+              ))}
+            </tbody>
+          </Table>
+        </TableWrap>
+        {(waPerluDiproses ?? 0) > 0 && (
+          <p className="mt-2 text-sm text-ink-2">
+            {waPerluDiproses} pesanan WA belum lunas atau belum diambil.{" "}
+            <Link href="/pesanan" className="font-medium text-accent hover:underline">
+              Lihat pesanan
+            </Link>
+          </p>
+        )}
+      </section>
+
+      <section>
+        <h2 className="font-medium text-ink mb-3">Produk terlaris</h2>
         <Card className="divide-y divide-rule-2">
           {bestSellersSorted.map(([nama, qty]) => (
             <div key={nama} className="flex justify-between px-4 py-2 text-sm">
@@ -327,12 +388,12 @@ export default async function LaporanPage({
       </section>
 
       <section>
-        <h2 className="font-medium text-ink mb-3">Log meja dibatalkan</h2>
+        <h2 className="font-medium text-ink mb-3">Log meja dan pesanan dibatalkan</h2>
         <Card className="divide-y divide-rule-2">
           {cancelledOrderRows.map((c) => (
             <div key={c.id} className="px-4 py-2 text-sm">
               <div className="flex justify-between">
-                <span>Meja {c.tables?.nomor ?? "-"}</span>
+                <span>{c.tables ? `Meja ${c.tables.nomor}` : `Pesanan WA ${c.kode ?? ""}`}</span>
                 <span className="text-ink-3">{formatWaktu(c.dibatalkan_pada)}</span>
               </div>
               <p className="text-xs text-ink-3">
@@ -341,7 +402,7 @@ export default async function LaporanPage({
             </div>
           ))}
           {cancelledOrderRows.length === 0 && (
-            <p className="px-4 py-4 text-sm text-ink-3">Tidak ada meja yang dibatalkan pada periode ini.</p>
+            <p className="px-4 py-4 text-sm text-ink-3">Tidak ada pembatalan pada periode ini.</p>
           )}
         </Card>
       </section>

@@ -6,6 +6,7 @@ Struktur database aplikasi. Untuk project Supabase baru, jalankan file di `migra
 2. `20260903000001_seed_initial_data.sql` — 10 meja, 2 kategori, menu contoh
 3. `20260904000000_add_item_notes_and_order_cancel.sql` — catatan item, batal pesanan
 4. `20261024000000_foto_produk.sql` — kolom `foto_url` dan bucket foto `produk`
+5. `20261024010000_pesanan_wa.sql` — pesanan WhatsApp, metode transfer, info pembayaran WA
 
 File 1–3 dipulihkan dari riwayat sesi saat project lama (`surftxeqwktwdutuwgbb`) dibuat, dan cocok dengan `src/types/database.ts`.
 

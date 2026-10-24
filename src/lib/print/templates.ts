@@ -36,7 +36,7 @@ export function buildPaymentReceipt(input: {
   subtotal: number;
   diskon: number;
   total: number;
-  metode: "tunai" | "qris";
+  metode: "tunai" | "qris" | "transfer";
   jumlahDibayar: number | null;
   kembalian: number | null;
   waktu: string;
@@ -58,7 +58,7 @@ export function buildPaymentReceipt(input: {
   r.row("Subtotal", formatRupiah(input.subtotal));
   if (input.diskon > 0) r.row("Diskon", `-${formatRupiah(input.diskon)}`);
   r.bold(true).row("TOTAL", formatRupiah(input.total)).bold(false);
-  r.row("Metode", input.metode === "tunai" ? "Tunai" : "QRIS");
+  r.row("Metode", input.metode === "tunai" ? "Tunai" : input.metode === "qris" ? "QRIS" : "Transfer");
   if (input.metode === "tunai") {
     r.row("Dibayar", formatRupiah(input.jumlahDibayar ?? 0));
     r.row("Kembalian", formatRupiah(input.kembalian ?? 0));

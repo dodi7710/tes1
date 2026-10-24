@@ -22,7 +22,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <TopBar
           displayName={profile.display_name}
           role={profile.role}
-          storeName={settings?.nama_warung ?? "Warung Susu Murni"}
+          storeName={settings?.nama_warung ?? "Susu Moerni"}
         />
         <div className="flex-1 flex flex-col">{children}</div>
       </div>

@@ -8,9 +8,14 @@ import PrinterStatusButton from "@/components/printer-status-button";
 import Badge from "@/components/ui/badge";
 import type { Role } from "@/types/database";
 
-const KASIR_LINKS = [{ href: "/meja", label: "Meja" }, { href: "/shift", label: "Shift" }];
+const KASIR_LINKS = [
+  { href: "/meja", label: "Meja" },
+  { href: "/pesanan", label: "Pesanan WA" },
+  { href: "/shift", label: "Shift" },
+];
 const PEMILIK_LINKS = [
   { href: "/meja", label: "Meja" },
+  { href: "/pesanan", label: "Pesanan WA" },
   { href: "/menu", label: "Menu" },
   { href: "/shift", label: "Shift" },
   { href: "/laporan", label: "Laporan" },

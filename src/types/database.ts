@@ -150,9 +150,19 @@ export type Database = {
           dibuka_pada: string
           ditutup_pada: string | null
           id: string
-          meja_id: string
-          shift_id: string
+          meja_id: string | null
+          shift_id: string | null
           status: string
+          catatan: string | null
+          diambil_oleh: string | null
+          diambil_pada: string | null
+          diubah_oleh: string | null
+          diubah_pada: string | null
+          jenis: string
+          kode: string | null
+          nama_pelanggan: string | null
+          no_wa: string | null
+          waktu_ambil: string | null
         }
         Insert: {
           alasan_batal?: string | null
@@ -162,9 +172,19 @@ export type Database = {
           dibuka_pada?: string
           ditutup_pada?: string | null
           id?: string
-          meja_id: string
-          shift_id: string
+          meja_id?: string | null
+          shift_id?: string | null
           status?: string
+          catatan?: string | null
+          diambil_oleh?: string | null
+          diambil_pada?: string | null
+          diubah_oleh?: string | null
+          diubah_pada?: string | null
+          jenis?: string
+          kode?: string | null
+          nama_pelanggan?: string | null
+          no_wa?: string | null
+          waktu_ambil?: string | null
         }
         Update: {
           alasan_batal?: string | null
@@ -174,14 +194,38 @@ export type Database = {
           dibuka_pada?: string
           ditutup_pada?: string | null
           id?: string
-          meja_id?: string
-          shift_id?: string
+          meja_id?: string | null
+          shift_id?: string | null
           status?: string
+          catatan?: string | null
+          diambil_oleh?: string | null
+          diambil_pada?: string | null
+          diubah_oleh?: string | null
+          diubah_pada?: string | null
+          jenis?: string
+          kode?: string | null
+          nama_pelanggan?: string | null
+          no_wa?: string | null
+          waktu_ambil?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "orders_dibatalkan_oleh_fkey"
             columns: ["dibatalkan_oleh"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_diambil_oleh_fkey"
+            columns: ["diambil_oleh"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_diubah_oleh_fkey"
+            columns: ["diubah_oleh"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -219,7 +263,7 @@ export type Database = {
           kembalian: number | null
           metode: string
           order_id: string
-          shift_id: string
+          shift_id: string | null
           subtotal: number
           total: number
         }
@@ -232,7 +276,7 @@ export type Database = {
           kembalian?: number | null
           metode: string
           order_id: string
-          shift_id: string
+          shift_id?: string | null
           subtotal: number
           total: number
         }
@@ -245,7 +289,7 @@ export type Database = {
           kembalian?: number | null
           metode?: string
           order_id?: string
-          shift_id?: string
+          shift_id?: string | null
           subtotal?: number
           total?: number
         }
@@ -341,19 +385,25 @@ export type Database = {
       store_settings: {
         Row: {
           alamat: string | null
+          alamat_ambil: string | null
           id: number
+          info_pembayaran_wa: string | null
           logo_url: string | null
           nama_warung: string
         }
         Insert: {
           alamat?: string | null
+          alamat_ambil?: string | null
           id?: number
+          info_pembayaran_wa?: string | null
           logo_url?: string | null
           nama_warung?: string
         }
         Update: {
           alamat?: string | null
+          alamat_ambil?: string | null
           id?: number
+          info_pembayaran_wa?: string | null
           logo_url?: string | null
           nama_warung?: string
         }
@@ -409,6 +459,7 @@ export type TablesUpdate<T extends keyof DefaultSchema["Tables"]> =
 export type Role = "kasir" | "pemilik"
 export type StatusMeja = "kosong" | "terisi"
 export type StatusOrder = "terbuka" | "lunas" | "dibatalkan"
+export type JenisOrder = "dine_in" | "wa"
 export type StatusOrderItem = "aktif" | "dibatalkan"
-export type MetodeBayar = "tunai" | "qris"
+export type MetodeBayar = "tunai" | "qris" | "transfer"
 export type StatusShift = "buka" | "tutup"
