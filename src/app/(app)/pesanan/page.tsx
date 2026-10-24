@@ -48,16 +48,16 @@ export default async function PesananPage({ searchParams }: { searchParams: Prom
   return (
     <main className="flex-1 p-4 max-w-3xl w-full mx-auto space-y-4">
       <PageHeader
-        title="Pesanan WA"
-        subtitle="Pesanan dari WhatsApp yang diambil sendiri oleh pelanggan."
+        title="ORDER"
+        subtitle="Order dari WhatsApp, diambil sendiri oleh pelanggan."
         actions={
           <Link href="/pesanan/baru" className={buttonClasses({ size: "sm" })}>
-            + Pesanan baru
+            + Order baru
           </Link>
         }
       />
 
-      <nav className="flex gap-1 overflow-x-auto -mx-1 px-1" aria-label="Filter status">
+      <nav className="flex flex-wrap gap-1 -mx-1 px-1" aria-label="Filter status">
         {FILTERS.map((f) => (
           <Link
             key={f.key}

@@ -16,7 +16,7 @@ export default async function PesananBaruPage() {
 
   return (
     <main className="flex-1 p-4 max-w-5xl w-full mx-auto space-y-4">
-      <PageHeader title="Pesanan WA baru" back={{ href: "/pesanan", label: "Pesanan WA" }} />
+      <PageHeader title="Order baru" back={{ href: "/pesanan", label: "ORDER" }} />
       <WaOrderForm categories={categories ?? []} products={products ?? []} />
     </main>
   );

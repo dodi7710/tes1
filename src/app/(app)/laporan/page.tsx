@@ -254,7 +254,7 @@ export default async function LaporanPage({
               {(
                 [
                   ["Dine-in (meja)", perKanal.dine_in],
-                  ["Pesanan WA", perKanal.wa],
+                  ["Order WA", perKanal.wa],
                 ] as const
               ).map(([nama, v]) => (
                 <Tr key={nama}>
@@ -393,7 +393,7 @@ export default async function LaporanPage({
           {cancelledOrderRows.map((c) => (
             <div key={c.id} className="px-4 py-2 text-sm">
               <div className="flex justify-between">
-                <span>{c.tables ? `Meja ${c.tables.nomor}` : `Pesanan WA ${c.kode ?? ""}`}</span>
+                <span>{c.tables ? `Meja ${c.tables.nomor}` : `Order WA ${c.kode ?? ""}`}</span>
                 <span className="text-ink-3">{formatWaktu(c.dibatalkan_pada)}</span>
               </div>
               <p className="text-xs text-ink-3">

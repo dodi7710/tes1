@@ -96,7 +96,7 @@ export default function WaOrderDetail({
           </span>
         }
         subtitle={`Dibuat ${formatWaktu(order.dibukaPada)}${order.dibukaOleh ? ` oleh ${order.dibukaOleh}` : ""}`}
-        back={{ href: "/pesanan", label: "Pesanan WA" }}
+        back={{ href: "/pesanan", label: "ORDER" }}
       />
 
       <div className="flex flex-col md:flex-row gap-4 md:items-start">

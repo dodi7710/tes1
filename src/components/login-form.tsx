@@ -1,6 +1,7 @@
 // Hallmark · family: auth · design-system: design.md
 "use client";
 
+import Image from "next/image";
 import { useState, useTransition } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { loginEmailFor, pinToPassword } from "@/lib/auth/login-email";
@@ -66,8 +67,13 @@ export default function LoginForm({ staff }: { staff: Staff[] }) {
     return (
       <main className="min-h-dvh flex items-center justify-center bg-paper p-6">
         <div className="w-full max-w-2xl">
-          <h1 className="font-display text-2xl font-semibold text-ink mb-1">Kasir Warung Susu</h1>
-          <p className="text-ink-2 mb-8">Pilih nama Anda untuk masuk</p>
+          <div className="flex items-center gap-4 mb-8">
+            <Image src="/logo.png" alt="" width={88} height={88} priority className="h-20 w-20 sm:h-22 sm:w-22 shrink-0" />
+            <div>
+              <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-ink">Kasir Susu Moerni</h1>
+              <p className="text-ink-2 mt-0.5">Pilih nama Anda untuk masuk</p>
+            </div>
+          </div>
           {staff.length === 0 ? (
             <p className="text-ink-2">Belum ada akun staff aktif. Hubungi pemilik untuk dibuatkan akun.</p>
           ) : (

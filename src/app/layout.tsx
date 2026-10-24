@@ -1,31 +1,27 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Nunito } from "next/font/google";
 import ServiceWorkerRegister from "@/components/service-worker-register";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+// Rounded and heavy like the lettering on the cow logo.
+const nunito = Nunito({
+  variable: "--font-nunito",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "Kasir Warung Susu",
+  title: "Kasir Susu Moerni",
   description: "Aplikasi kasir warung susu murni",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Kasir Warung Susu",
+    title: "Susu Moerni",
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#B9702F",
+  themeColor: "#2c72bb",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -36,7 +32,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="id"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${nunito.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-paper text-ink font-body">
         {children}

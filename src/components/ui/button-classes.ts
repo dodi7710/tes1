@@ -21,7 +21,7 @@ export function buttonClasses({
   className?: string;
 } = {}) {
   const base =
-    "inline-flex items-center justify-center gap-2 rounded-input font-medium transition duration-short ease-out active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-paper";
+    "inline-flex items-center justify-center gap-2 rounded-input font-bold transition duration-short ease-out active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-paper";
   const sizes: Record<Size, string> = {
     sm: "min-h-10 px-3 text-sm",
     md: "min-h-12 px-4 text-sm",

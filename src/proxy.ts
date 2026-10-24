@@ -1,7 +1,10 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PEMILIK_ONLY_PREFIXES = ["/menu", "/pengaturan", "/laporan"];
+// /pengaturan is open to kasir too: they need its Printer and "PIN saya"
+// sections. The page hides the owner-only sections, and every owner action
+// still checks the role itself (requireSession("pemilik")).
+const PEMILIK_ONLY_PREFIXES = ["/menu", "/laporan"];
 const PUBLIC_PATHS = ["/login"];
 
 export async function proxy(request: NextRequest) {
@@ -57,5 +60,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|manifest.json|sw.js|icons).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|manifest.json|sw.js|icons|.*\.png$).*)"],
 };

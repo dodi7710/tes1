@@ -1,8 +1,8 @@
 // Minimal service worker: only makes the app installable and caches the
 // static app shell for faster reloads. This app is online-only (PRD NFR) —
 // we deliberately do NOT cache or replay API calls, so data is always fresh.
-const CACHE = "kasir-shell-v1";
-const SHELL = ["/manifest.json", "/icons/icon.svg"];
+const CACHE = "kasir-shell-v2";
+const SHELL = ["/manifest.json", "/logo.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)));

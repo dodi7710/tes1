@@ -16,7 +16,7 @@ export default function PageHeader({
   return (
     <div className="flex items-start justify-between gap-4">
       <div>
-        <h1 className="text-xl font-display font-semibold text-ink">{title}</h1>
+        <h1 className="text-2xl font-display font-extrabold tracking-tight text-ink">{title}</h1>
         {subtitle && <p className="text-sm text-ink-2 mt-0.5">{subtitle}</p>}
       </div>
       <div className="flex items-center gap-3 shrink-0">
